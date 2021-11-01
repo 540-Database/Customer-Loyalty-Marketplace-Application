@@ -6,7 +6,7 @@ create table Admin
 
 CREATE TABLE Brand
 (
-    BrandID  INTEGER     NOT NULL,
+    BrandID  varchar(45) NOT NULL,
     Password varchar(45) NOT NULL,
     Name     VARCHAR(45),
     Address  VARCHAR(255),
@@ -16,19 +16,21 @@ CREATE TABLE Brand
 
 CREATE TABLE Customer
 (
-    CustomerID INTEGER     NOT NULL,
+    CustomerID varchar(45) NOT NULL,
     Password   varchar(45) NOT NULL,
     Name       VARCHAR(45),
     Phone      VARCHAR(45),
     Address    VARCHAR(255),
+    WalletID   varchar(45),
     PRIMARY KEY (CustomerID)
 );
 
 CREATE TABLE RegularLoyaltyProgram
 (
-    Loyalty_Program_ID INTEGER NOT NULL,
-    BrandID            INTEGER,
-    IsTiered           NUMBER(1),
+    Loyalty_Program_ID   varchar(45) NOT NULL,
+    Loyalty_Program_Name varchar(45) NOT NULL,
+    BrandID              varchar(45),
+    IsTiered             NUMBER(1),
     -- regular: 0
     -- tiered: 1
     foreign key (BrandID) references Brand,
@@ -38,10 +40,11 @@ CREATE TABLE RegularLoyaltyProgram
 
 CREATE TABLE TieredProgram
 (
-    Loyalty_Program_ID INTEGER NOT NULL,
-    LevelNumber        INTEGER NOT NULL,
+    Loyalty_Program_ID varchar(45) NOT NULL,
+    LevelNumber        INTEGER     NOT NULL,
     PointsRequired     INTEGER,
     LevelName          VARCHAR(45),
+    multiplier         number(10, 1),
     FOREIGN KEY (Loyalty_Program_ID) REFERENCES REGULARLOYALTYPROGRAM,
     PRIMARY KEY (Loyalty_Program_ID, LevelNumber)
 );
@@ -58,7 +61,7 @@ CREATE TABLE TieredProgram
 -- special activity: join
 CREATE TABLE Activity
 (
-    ActivityID   INTEGER NOT NULL,
+    ActivityID   varchar(45) NOT NULL,
     ActivityName varchar(45),
 --     FOREIGN KEY (ActivityID) REFERENCES Categories,
     PRIMARY KEY (ActivityID)
@@ -66,8 +69,8 @@ CREATE TABLE Activity
 -- purchase, leave a review, refer a friend.
 CREATE TABLE Loyalty_Program_has_Activity
 (
-    Loyalty_Program_ID INTEGER NOT NULL,
-    ActivityID         INTEGER NOT NULL,
+    Loyalty_Program_ID varchar(45) NOT NULL,
+    ActivityID         varchar(45) NOT NULL,
 
     FOREIGN KEY (Loyalty_Program_ID) REFERENCES RegularLoyaltyProgram,
     FOREIGN KEY (ActivityID) REFERENCES Activity,
@@ -83,9 +86,9 @@ CREATE TABLE Loyalty_Program_has_Activity
 CREATE TABLE RERules
 (
     RECode             VARCHAR(45) NOT NULL,
-    BrandID            integer,
-    Loyalty_Program_ID INTEGER     NOT NULL,
-    ActivityID         INTEGER     NOT NULL,
+    BrandID            varchar(45),
+    Loyalty_Program_ID varchar(45) NOT NULL,
+    ActivityID         varchar(45) NOT NULL,
     Points             Integer,
     VersionNumber      Integer,
     Status             integer,
@@ -103,7 +106,7 @@ CREATE TABLE RERules
 -- gift card, free product (new types may also be added later)
 CREATE TABLE Reward
 (
-    RewardID   INTEGER NOT NULL,
+    RewardID   varchar(45) NOT NULL,
     RewardName varchar(45),
 --     FOREIGN KEY (RewardCode) REFERENCES Categories,
     PRIMARY KEY (RewardID)
@@ -112,8 +115,8 @@ CREATE TABLE Reward
 --这里，选类别，加数量
 CREATE TABLE Loyalty_Program_has_Reward
 (
-    Loyalty_Program_ID INTEGER NOT NULL,
-    RewardID           INTEGER NOT NULL,
+    Loyalty_Program_ID varchar(45) NOT NULL,
+    RewardID           varchar(45) NOT NULL,
     Quantity           integer,
     FOREIGN KEY (Loyalty_Program_ID) REFERENCES RegularLoyaltyProgram,
     FOREIGN KEY (RewardID) REFERENCES Reward,
@@ -125,9 +128,9 @@ CREATE TABLE Loyalty_Program_has_Reward
 CREATE TABLE RRRules
 (
     RRCode             VARCHAR(45) NOT NULL,
-    Loyalty_Program_ID INTEGER     NOT NULL,
-    BrandID            INTEGER     NOT NULL,
-    RewardID           INTEGER     NOT NULL,
+    Loyalty_Program_ID varchar(45) NOT NULL,
+    BrandID            varchar(45) NOT NULL,
+    RewardID           varchar(45) NOT NULL,
     Points             Integer,
     Status             NUMBER(1)   NOT NULL,
     --True: 1
@@ -142,10 +145,10 @@ CREATE TABLE RRRules
 -- special activity: join
 CREATE TABLE CustomerActivities
 (
-    CustomerActivityID INTEGER NOT NULL,
-    CustomerID         INTEGER NOT NULL,
-    BrandID            INTEGER,
-    ActivityID         INTEGER NOT NULL,
+    CustomerActivityID Integer     not null,
+    CustomerID         varchar(45) NOT NULL,
+    BrandID            varchar(45),
+    ActivityID         varchar(45) NOT NULL,
     PointsEarned       Integer,
     ActivityDate       DATE,
 
@@ -159,8 +162,8 @@ CREATE TABLE CustomerActivities
 CREATE TABLE PurchaseRecord
 (
     CustomerActivityID INTEGER     NOT NULL,
-    CustomerID         INTEGER     NOT NULL,
-    BrandID            INTEGER     NOT NULL,
+    CustomerID         varchar(45) NOT NULL,
+    BrandID            varchar(45) NOT NULL,
     MoneySpent         INTEGER     NOT NULL,
     PointsEarned       Integer     NOT NULL,
     GiftCardUsed       INTEGER     NOT NULL,
@@ -177,8 +180,8 @@ CREATE TABLE PurchaseRecord
 create table ReviewRecord
 (
     CustomerActivityID INTEGER     NOT NULL,
-    CustomerID         INTEGER     NOT NULL,
-    BrandID            INTEGER     NOT NULL,
+    CustomerID         varchar(45) NOT NULL,
+    BrandID            varchar(45) NOT NULL,
     Review             varchar(45) NOT NULL,
     ReviewDate         DATE        NOT NULL,
     RECode             VARCHAR(45) NOT NULL,
@@ -192,9 +195,9 @@ create table ReviewRecord
 create table ReferRecord
 (
     CustomerActivityID INTEGER     NOT NULL,
-    CustomerID         INTEGER     NOT NULL,
-    BrandID            INTEGER     NOT NULL,
-    ReferCustomerID    INTEGER     NOT NULL,
+    CustomerID         varchar(45) NOT NULL,
+    BrandID            varchar(45) NOT NULL,
+    ReferCustomerID    varchar(45) NOT NULL,
     ReferDate          DATE        NOT NULL,
     RECode             VARCHAR(45) NOT NULL,
     VersionNumber      Integer,
@@ -210,37 +213,38 @@ create table ReferRecord
 
 CREATE TABLE Wallet
 (
-    CustomerID         INTEGER NOT NULL,
-    Loyalty_Program_ID INTEGER NOT NULL,
-    BrandID            INTEGER NOT NULL,
-    Points             INTEGER NOT NULL,
-    TotalPoints        INTEGER NOT NULL,
+    WalletID           varchar(45) NOT NULL,
+    CustomerID         varchar(45) NOT NULL,
+    Loyalty_Program_ID varchar(45) NOT NULL,
+    BrandID            varchar(45) NOT NULL,
+    Points             INTEGER     NOT NULL,
+    TotalPoints        INTEGER     NOT NULL,
     LevelNumber        Integer,
     FOREIGN KEY (CustomerID) REFERENCES Customer,
     FOREIGN KEY (Loyalty_Program_ID) REFERENCES RegularLoyaltyProgram,
 --     FOREIGN KEY (LevelNumber) references TieredProgram,
     FOREIGN KEY (BrandID) REFERENCES Brand,
-    PRIMARY KEY (CustomerID, Loyalty_Program_ID)
+    PRIMARY KEY (WalletID, BrandID)
 );
 --记录每个客户兑换过的reward，消费时会用上
 create table WalletRewards
 (
-    CustomerID integer not null,
-    BrandID    INTEGER NOT NULL,
-    RewardID   INTEGER NOT NULL,
+    CustomerID varchar(45) not null,
+    BrandID    varchar(45) NOT NULL,
+    RewardID   varchar(45) NOT NULL,
     Quantity   integer,
     primary key (CustomerID, BrandID, RewardID)
 );
 
 CREATE TABLE RedeemRecord
 (
-    CustomerID    INTEGER NOT NULL,
-    BrandID       INTEGER NOT NULL,
-    PointRedeemed INTEGER NOT NULL,
+    CustomerID    varchar(45) NOT NULL,
+    BrandID       varchar(45) NOT NULL,
+    PointRedeemed INTEGER     NOT NULL,
     RRCode        VARCHAR(45),
     VersionNum    VARCHAR(45),
-    RedeemDate    DATE    NOT NULL,
-    RewardID      INTEGER NOT NULL,
+    RedeemDate    DATE        NOT NULL,
+    RewardID      varchar(45) NOT NULL,
     Quantity      integer,
     FOREIGN KEY (CustomerID) REFERENCES Customer,
     FOREIGN KEY (BrandID) REFERENCES Brand,
