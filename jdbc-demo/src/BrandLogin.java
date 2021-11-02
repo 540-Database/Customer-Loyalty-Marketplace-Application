@@ -3,33 +3,28 @@ import java.util.Scanner;
 
 public class BrandLogin {
 
-    public static void verifyLogin(Connection connection){
+    public static void verifyLogin(Connection connection) {
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
-        while (true){
+        while (true) {
             System.out.println("\nPlease enter brand's id and password, split with comma:");
             System.out.println("To return to the root menu, please enter 0.");
             String idAndPassword = scanner.next();
             if (idAndPassword.equals("0"))
                 return;
             ResultSet resultSet = null;
-            try{
-<<<<<<< HEAD
+            try {
                 String[] idAndPasswordSplit = idAndPassword.split(",");
                 String id = idAndPasswordSplit[0].trim(), password = idAndPasswordSplit[1].trim();
-=======
-                String[] nameAndPasswordSplit = nameAndPassword.split(",");
-                String name = nameAndPasswordSplit[0].trim(), password = nameAndPasswordSplit[1].trim();
->>>>>>> aa39b53284c7bdf5f6a6ff3253b783ec87f7453c
                 Statement statement = connection.createStatement();
                 resultSet = statement.executeQuery(String.format("SELECT * FROM BRAND WHERE BRANDID='%s' AND PASSWORD='%s'", id, password));
                 if (!resultSet.next())
                     System.out.println("Wrong brand's id or password entered! Please try again.");
-                else{
+                else {
                     System.out.println("\nLogin success! Welcome~");
                     break;
                 }
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
