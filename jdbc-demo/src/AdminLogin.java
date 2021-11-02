@@ -41,13 +41,11 @@ public class AdminLogin {
         do {
             System.out.println("\n---------- Admin Page ----------");
             System.out.println("Please enter your option: ");
-            System.out.println("0. Exit\n1. Add brand\n2. Add customer\n3. Show brand's info\n4. Show customer's info\n" +
-                    "5. Add activity type\n6. Add reward type\n7. Log out\n");
+            System.out.println("1. Add brand\n2. Add customer\n3. Show brand's info\n4. Show customer's info\n" +
+                    "5. Add activity type\n6. Add reward type\n7. Log out");
 
             choice = scanner.nextInt();
             switch (choice) {
-                case 0:
-                    break;
                 case 1:
                     addBrand(connection);
                     break;
@@ -55,12 +53,16 @@ public class AdminLogin {
                     addCustomer(connection);
                     break;
                 case 3:
+                    showBrandsInfo(connection);
                     break;
                 case 4:
+                    showCustomersInfo(connection);
                     break;
                 case 5:
+                    addActivityType(connection);
                     break;
                 case 6:
+                    addRewardType(connection);
                     break;
                 case 7:
                     break;
@@ -68,7 +70,7 @@ public class AdminLogin {
                     System.out.println("Invaild option entered. Please try again.");
                     break;
             }
-        } while (choice != 0);
+        } while (choice != 7);
     }
 
     public static void addBrand(Connection connection) throws SQLException {
@@ -76,7 +78,6 @@ public class AdminLogin {
         Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
         String[] sp = input.split(",");
-        System.out.println(sp.length);
         if (sp.length != 4) {
             System.out.println("Input format error!!!");
         }
@@ -96,7 +97,7 @@ public class AdminLogin {
         String sql = String.format("INSERT INTO %s VALUES (%s)", "BRAND", sb);
         try {
             connection.createStatement().executeUpdate(sql);
-            System.out.println("Add brand successfully!\n");
+            System.out.println("Add brand successfully!");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -126,6 +127,90 @@ public class AdminLogin {
         try {
             connection.createStatement().executeUpdate(sql);
             System.out.println("\nAdd customer successfully!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void showBrandsInfo(Connection connection) throws SQLException {
+        String sql = "SELECT * FROM BRAND";
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            System.out.println("BrandID\t\tPassword\t\tName\t\tAddress\t\tJoinDate");
+            while (resultSet.next()) {
+                System.out.println(resultSet.getString(1) + "\t\t" + resultSet.getString(2) + "\t\t" + resultSet.getString(3) + "\t\t" + resultSet.getString(4) + "\t\t" + resultSet.getString(5));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void showCustomersInfo(Connection connection) throws SQLException {
+        String sql = "SELECT * FROM CUSTOMER";
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            System.out.println("CustomerID\t\tPassword\t\tName\t\tPhone\t\tAddress\t\tWalletID");
+            while (resultSet.next()) {
+                System.out.println(resultSet.getString(1) + "\t\t" + resultSet.getString(2) + "\t\t" + resultSet.getString(3) + "\t\t" + resultSet.getString(4) + "\t\t" + resultSet.getString(5) + "\t\t" + resultSet.getString(6));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void addActivityType(Connection connection) throws SQLException {
+        System.out.println("Please enter Activity Type ID, Name. (split by ',')");
+        Scanner scanner = new Scanner(System.in);
+        scanner.useDelimiter("\n");
+        String input = scanner.nextLine();
+        String[] sp = input.split(",");
+        if (sp.length != 2) {
+            System.out.println("Input format error!!!");
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < sp.length; i++) {
+            if ("NULL".equals(sp[i])) {
+                sb.append(sp[i].trim());
+            } else {
+                sb.append(String.format("'%s'", sp[i].trim()));
+            }
+            if (i != sp.length - 1) {
+                sb.append(",");
+            }
+        }
+        String sql = String.format("INSERT INTO %s VALUES (%s)", "ACTIVITY", sb);
+        try {
+            connection.createStatement().executeUpdate(sql);
+            System.out.println("Add activity type successfully!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void addRewardType(Connection connection) throws SQLException {
+        System.out.println("Please enter Reward Type ID, Name. (split by ',')");
+        Scanner scanner = new Scanner(System.in);
+        scanner.useDelimiter("\n");
+        String input = scanner.nextLine();
+        String[] sp = input.split(",");
+        if (sp.length != 2) {
+            System.out.println("Input format error!!!");
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < sp.length; i++) {
+            if ("NULL".equals(sp[i])) {
+                sb.append(sp[i].trim());
+            } else {
+                sb.append(String.format("'%s'", sp[i].trim()));
+            }
+            if (i != sp.length - 1) {
+                sb.append(",");
+            }
+        }
+        String sql = String.format("INSERT INTO %s VALUES (%s)", "REWARD", sb);
+        try {
+            connection.createStatement().executeUpdate(sql);
+            System.out.println("Add reward type successfully!");
         } catch (SQLException e) {
             e.printStackTrace();
         }
