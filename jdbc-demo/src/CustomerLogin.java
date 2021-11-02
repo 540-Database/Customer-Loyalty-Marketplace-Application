@@ -1,7 +1,10 @@
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class CustomerLogin {
+    static String customerId = null;
 
     public static void verifyLogin(Connection connection) {
         Scanner scanner = new Scanner(System.in);
@@ -16,6 +19,7 @@ public class CustomerLogin {
             try {
                 String[] idAndPasswordSplit = idAndPassword.split(",");
                 String id = idAndPasswordSplit[0].trim(), password = idAndPasswordSplit[1].trim();
+                customerId = id;
                 Statement statement = connection.createStatement();
                 resultSet = statement.executeQuery(String.format("SELECT * FROM CUSTOMER WHERE CUSTOMERID='%s' AND PASSWORD='%s'", id, password));
                 if (!resultSet.next())
@@ -25,6 +29,7 @@ public class CustomerLogin {
                     break;
                 }
             } catch (SQLException e) {
+                customerId = null;
                 e.printStackTrace();
             }
         }
@@ -48,6 +53,7 @@ public class CustomerLogin {
                 case 1:
                     break;
                 case 2:
+                    rewardActivities(connection);
                     break;
                 case 3:
                     break;
@@ -65,4 +71,76 @@ public class CustomerLogin {
             }
         } while (choice != 0);
     }
+
+    public static void rewardActivities(Connection connection) throws SQLException {
+        Scanner scanner = new Scanner(System.in);
+        scanner.useDelimiter("\n");
+        String sql = String.format("SELECT LOYALTY_PROGRAM_ID FROM WALLET WHERE CUSTOMERID = '%s'", customerId);
+
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            System.out.println("LOYALTY_PROGRAM_ID");
+            while (resultSet.next()) {
+                System.out.println(resultSet.getString(1));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        System.out.println("Please select loyalty programs");
+        String loyaltyProgramId = scanner.next();
+        String sql2 = String.format("SELECT DISTINCT ACTIVITYID FROM RERULES WHERE LOYALTY_PROGRAM_ID = '%s'", loyaltyProgramId);
+        List<String> activityIds = new ArrayList<>();
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql2);
+            while (resultSet.next()) {
+                activityIds.add(resultSet.getString(1));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        // todo: if error, stay in this page
+
+
+        List<String> activityNames = new ArrayList<>();
+        for (String activityId : activityIds) {
+            String sql3 = String.format("SELECT ACTIVITYNAME FROM ACTIVITY WHERE ACTIVITYID = '%s'", activityId);
+            try {
+                ResultSet resultSet = connection.createStatement().executeQuery(sql3);
+                while (resultSet.next()) {
+                    activityNames.add(resultSet.getString(1));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        do {
+            System.out.println("Please select activities");
+            for (int i = 0; i < activityNames.size(); i++) {
+                System.out.println(i + ". " + activityNames.get(i));
+            }
+            System.out.println(activityNames.size() + ". Back");
+            int activityId = scanner.nextInt();
+            if (activityId == activityNames.size()) {
+                break;
+            }
+            String ActivityId = scanner.next().trim();
+            switch (ActivityId){
+                case "A01":
+                    purchase(connection, loyaltyProgramId);
+                    break;
+                case "A02":
+                    break;
+                case "A03":
+                    break;
+
+            }
+
+        } while (true);
+    }
+
+
 }
