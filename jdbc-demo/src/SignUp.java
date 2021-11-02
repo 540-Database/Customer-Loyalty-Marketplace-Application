@@ -13,7 +13,7 @@ public class SignUp {
 
         int choice = 0;
         do {
-            System.out.println("---------- Signup Page ----------");
+            System.out.println("\n---------- Signup Page ----------");
             System.out.println("Please enter your option: ");
             System.out.println("0. Exit\n1. Sign up as customer\n2. Sign up as brand\n");
 
@@ -34,20 +34,19 @@ public class SignUp {
         } while (choice != 0);
     }
 
-    public static void registerAsCustomer(Connection connection){
+    public static void registerAsCustomer(Connection connection) {
         System.out.println("Please enter your customerID, password, name, phone, address, walletID. (split by ',')");
         Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
         String[] sp = input.split(",");
-        System.out.println(sp.length);
         if (sp.length != 6) {
             System.out.println("Input format error!!!");
         }
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < sp.length; i++) {
-            if("NULL".equals(sp[i])){
+            if ("NULL".equals(sp[i])) {
                 sb.append(sp[i].trim());
-            }else{
+            } else {
                 sb.append(String.format("'%s'", sp[i].trim()));
             }
             if (i != sp.length - 1) {
@@ -55,11 +54,10 @@ public class SignUp {
             }
         }
 
-        String sql = String.format("INSERT INTO %s VALUES (%s)","CUSTOMER",sb);
-        System.out.println(sql);
+        String sql = String.format("INSERT INTO %s VALUES (%s)", "CUSTOMER", sb);
         try {
             connection.createStatement().executeUpdate(sql);
-            System.out.println("Congrats! You sign up as customer successfully!");
+            System.out.println("\nCongrats! You sign up as customer successfully!");
             return;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -67,7 +65,7 @@ public class SignUp {
     }
 
 
-    public static void registerAsBrand(Connection connection){
+    public static void registerAsBrand(Connection connection) {
         System.out.println("Please enter your BrandID, password, name, address. (split by ',')");
         Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
@@ -78,9 +76,9 @@ public class SignUp {
         }
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < sp.length; i++) {
-            if("NULL".equals(sp[i])){
+            if ("NULL".equals(sp[i])) {
                 sb.append(sp[i].trim());
-            }else{
+            } else {
                 sb.append(String.format("'%s'", sp[i].trim()));
             }
             if (i != sp.length - 1) {
@@ -91,12 +89,11 @@ public class SignUp {
 //        System.out.println(now);
         sb.append(String.format(",to_date('%s','mm/dd/yyyy')", now));
 
-        String sql = String.format("INSERT INTO %s VALUES (%s)","BRAND",sb);
+        String sql = String.format("INSERT INTO %s VALUES (%s)", "BRAND", sb);
 //        System.out.println(sql);
         try {
             connection.createStatement().executeUpdate(sql);
             System.out.println("Congrats! You sign up as brand successfully!\n");
-            return;
         } catch (SQLException e) {
             e.printStackTrace();
         }
