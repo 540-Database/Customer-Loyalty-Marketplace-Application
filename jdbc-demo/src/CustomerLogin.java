@@ -14,8 +14,13 @@ public class CustomerLogin {
                 return;
             ResultSet resultSet = null;
             try{
+<<<<<<< HEAD
                 String[] idAndPasswordSplit = idAndPassword.split(",");
                 String id = idAndPasswordSplit[0].trim(), password = idAndPasswordSplit[1].trim();
+=======
+                String[] nameAndPasswordSplit = nameAndPassword.split(",");
+                String name = nameAndPasswordSplit[0].trim(), password = nameAndPasswordSplit[1].trim();
+>>>>>>> aa39b53284c7bdf5f6a6ff3253b783ec87f7453c
                 Statement statement = connection.createStatement();
                 resultSet = statement.executeQuery(String.format("SELECT * FROM CUSTOMER WHERE CUSTOMERID='%s' AND PASSWORD='%s'", id, password));
                 if (!resultSet.next())

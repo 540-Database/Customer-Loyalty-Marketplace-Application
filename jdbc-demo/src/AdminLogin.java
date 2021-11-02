@@ -9,8 +9,13 @@ public class AdminLogin {
     public static void verifyLogin(Connection connection) {
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
+<<<<<<< HEAD
         while (true) {
             System.out.println("\nPlease enter admin's user name and password, split with comma:");
+=======
+        while (true){
+            System.out.println("Please enter admin's user name and password, split with comma:");
+>>>>>>> aa39b53284c7bdf5f6a6ff3253b783ec87f7453c
             System.out.println("To return to the root menu, please enter 0.");
             String nameAndPassword = scanner.next();
             if (nameAndPassword.equals("0"))
