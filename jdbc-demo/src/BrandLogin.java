@@ -5,6 +5,7 @@ public class BrandLogin {
 
     public static void verifyLogin(Connection connection){
         Scanner scanner = new Scanner(System.in);
+        scanner.useDelimiter("\n");
         while (true){
             System.out.println("\nPlease enter brand's id and password, split with comma:");
             System.out.println("To return to the root menu, please enter 0.");
@@ -14,7 +15,7 @@ public class BrandLogin {
             ResultSet resultSet = null;
             try{
                 String[] idAndPasswordSplit = idAndPassword.split(",");
-                String id = idAndPasswordSplit[0], password = idAndPasswordSplit[1];
+                String id = idAndPasswordSplit[0].trim(), password = idAndPasswordSplit[1].trim();
                 Statement statement = connection.createStatement();
                 resultSet = statement.executeQuery(String.format("SELECT * FROM BRAND WHERE BRANDID='%s' AND PASSWORD='%s'", id, password));
                 if (!resultSet.next())

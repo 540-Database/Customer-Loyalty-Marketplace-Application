@@ -86,11 +86,8 @@ public class SignUp {
             }
         }
         String now = Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
-//        System.out.println(now);
         sb.append(String.format(",to_date('%s','mm/dd/yyyy')", now));
-
         String sql = String.format("INSERT INTO %s VALUES (%s)", "BRAND", sb);
-//        System.out.println(sql);
         try {
             connection.createStatement().executeUpdate(sql);
             System.out.println("Congrats! You sign up as brand successfully!\n");
@@ -98,5 +95,4 @@ public class SignUp {
             e.printStackTrace();
         }
     }
-
 }
