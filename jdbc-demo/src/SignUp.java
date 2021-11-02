@@ -1,5 +1,8 @@
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class SignUp {
@@ -22,6 +25,7 @@ public class SignUp {
                     registerAsCustomer(connection);
                     break;
                 case 2:
+                    registerAsBrand(connection);
                     break;
                 default:
                     System.out.println("Invaild option entered. Please try again.");
@@ -62,5 +66,40 @@ public class SignUp {
         }
     }
 
+
+    public static void registerAsBrand(Connection connection){
+        System.out.println("Please enter your BrandID, password, name, address. (split by ',')");
+        Scanner scanner = new Scanner(System.in);
+        String input = scanner.nextLine();
+        String[] sp = input.split(",");
+        System.out.println(sp.length);
+        if (sp.length != 4) {
+            System.out.println("Input format error!!!");
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < sp.length; i++) {
+            if("NULL".equals(sp[i])){
+                sb.append(sp[i].trim());
+            }else{
+                sb.append(String.format("'%s'", sp[i].trim()));
+            }
+            if (i != sp.length - 1) {
+                sb.append(",");
+            }
+        }
+        String now = Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+//        System.out.println(now);
+        sb.append(String.format(",to_date('%s','mm/dd/yyyy')", now));
+
+        String sql = String.format("INSERT INTO %s VALUES (%s)","BRAND",sb);
+//        System.out.println(sql);
+        try {
+            connection.createStatement().executeUpdate(sql);
+            System.out.println("Congrats! You sign up as brand successfully!");
+            return;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
 }
