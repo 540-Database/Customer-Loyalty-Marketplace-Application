@@ -76,7 +76,7 @@ public class DBConnection {
         System.out.println("\nWelcome to the Customer Loyalty Marketplace Application!\n");
         do{
             System.out.println("---------- Main Menu ----------");
-            System.out.println("Enter the choice: \n0. Exit\n1. Admin Login\n2. Brand Login\n3.Customer Login\n");
+            System.out.println("Enter the choice: \n0. Exit\n1. Admin Login\n2. Brand Login\n3. Customer Login\n");
             choice = scanner.nextInt();
             switch (choice){
                 case 0:
@@ -86,10 +86,10 @@ public class DBConnection {
                     AdminLogin.run(connection);
                     break;
                 case 2:
-//                    BrandLogin.run(connection);
+                    BrandLogin.run(connection);
                     break;
                 case 3:
-//                    CustomerLogin.run(connection);
+                    CustomerLogin.run(connection);
                     break;
                 default:
                     System.out.println("Input error, please retry.\n");
