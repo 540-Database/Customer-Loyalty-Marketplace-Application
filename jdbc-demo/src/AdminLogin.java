@@ -5,6 +5,7 @@ public class AdminLogin {
 
     public static void verifyLogin(Connection connection){
         Scanner scanner = new Scanner(System.in);
+        scanner.useDelimiter("\n");
         while (true){
             System.out.println("Please enter admin's user name and password, split with comma:");
             System.out.println("To return to the root menu, please enter 0.");
@@ -14,7 +15,7 @@ public class AdminLogin {
             ResultSet resultSet = null;
             try{
                 String[] nameAndPasswordSplit = nameAndPassword.split(",");
-                String name = nameAndPasswordSplit[0], password = nameAndPasswordSplit[1];
+                String name = nameAndPasswordSplit[0].trim(), password = nameAndPasswordSplit[1].trim();
                 Statement statement = connection.createStatement();
                 resultSet = statement.executeQuery(String.format("SELECT * FROM ADMIN WHERE ADMINID='%s' AND PASSWORD='%s'", name, password));
                 if (!resultSet.next())
