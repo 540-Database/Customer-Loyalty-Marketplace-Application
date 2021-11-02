@@ -56,6 +56,7 @@ public class SignUp {
         try {
             connection.createStatement().executeUpdate(sql);
             System.out.println("Congrats! You sign up as customer successfully!");
+            return;
         } catch (SQLException e) {
             e.printStackTrace();
         }
