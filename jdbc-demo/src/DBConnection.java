@@ -61,7 +61,7 @@ public class DBConnection {
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
         // connect to the Oracle server
-        setConnection("", "");
+        setConnection("zma24", "abcd1234");
         // todo: how to init Oracle database frame & data by Java?
 //        System.out.println("Need to recreate and reinitiate data tables? 1. NO. 2 Yes");
 //        // if yes, reinitiate the tables
@@ -70,9 +70,9 @@ public class DBConnection {
 //        }
         Scanner scanner = new Scanner(System.in);
         int choice;
-        System.out.println("\nWelcome to the Customer Loyalty Marketplace Application!\n");
+        System.out.println("\nWelcome to the Customer Loyalty Marketplace Application!");
         do {
-            System.out.println("---------- Main Menu ----------");
+            System.out.println("\n---------- Main Menu ----------");
             System.out.println("Enter the choice: \n0. Exit\n1. Admin Login\n2. Brand Login\n3. Customer Login\n4. Sign Up\n5. Show Queries\n");
             choice = scanner.nextInt();
             switch (choice) {

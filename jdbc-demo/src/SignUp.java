@@ -95,7 +95,7 @@ public class SignUp {
 //        System.out.println(sql);
         try {
             connection.createStatement().executeUpdate(sql);
-            System.out.println("Congrats! You sign up as brand successfully!");
+            System.out.println("Congrats! You sign up as brand successfully!\n");
             return;
         } catch (SQLException e) {
             e.printStackTrace();

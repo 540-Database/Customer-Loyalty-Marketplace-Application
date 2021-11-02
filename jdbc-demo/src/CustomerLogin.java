@@ -6,21 +6,21 @@ public class CustomerLogin {
     public static void verifyLogin(Connection connection){
         Scanner scanner = new Scanner(System.in);
         while (true){
-            System.out.println("Please enter customer's user name and password, split with comma:");
+            System.out.println("Please enter customer's user id and password, split with comma:");
             System.out.println("To return to the root menu, please enter 0.");
-            String nameAndPassword = scanner.next();
-            if (nameAndPassword.equals("0"))
+            String idAndPassword = scanner.next();
+            if (idAndPassword.equals("0"))
                 return;
             ResultSet resultSet = null;
             try{
-                String[] nameAndPasswordSplit = nameAndPassword.split(",");
-                String name = nameAndPasswordSplit[0], password = nameAndPasswordSplit[1];
+                String[] idAndPasswordSplit = idAndPassword.split(",");
+                String id = idAndPasswordSplit[0], password = idAndPasswordSplit[1];
                 Statement statement = connection.createStatement();
-                resultSet = statement.executeQuery(String.format("SELECT * FROM CUSTOMER WHERE NAME='%s' AND PASSWORD='%s'", name, password));
+                resultSet = statement.executeQuery(String.format("SELECT * FROM CUSTOMER WHERE CUSTOMERID='%s' AND PASSWORD='%s'", id, password));
                 if (!resultSet.next())
-                    System.out.println("Wrong customer username or password entered! Please try again.");
+                    System.out.println("Wrong customer id or password entered! Please try again.");
                 else{
-                    System.out.println("Login success! Welcome~");
+                    System.out.println("\nLogin success! Welcome~");
                     break;
                 }
             } catch (SQLException e){
@@ -35,10 +35,10 @@ public class CustomerLogin {
 
         int choice = 0;
         do {
-            System.out.println("---------- Customer Main Page ----------");
+            System.out.println("\n---------- Customer Main Page ----------");
             System.out.println("Please enter your option: ");
             System.out.println("0. Exit\n1. Enroll in a Loyalty Program\n2. Reward Activities\n3. View Wallet\n" +
-                    "4. Redeem Points\n5. Log out");
+                    "4. Redeem Points\n5. Log out\n");
 
             choice = scanner.nextInt();
             switch (choice) {
