@@ -47,11 +47,14 @@ public class DBConnection {
 //                    System.out.println(s + "   " + n);
 //                }
 
-            } finally {
-                close(rs);
-                close(stmt);
-                close(connection);
+            } catch (SQLException e){
+                e.printStackTrace();
             }
+//            finally {
+//                close(rs);
+//                close(stmt);
+//                close(connection);
+//            }
         } catch (Throwable oops) {
             oops.printStackTrace();
         }
@@ -70,14 +73,17 @@ public class DBConnection {
 //        }
         Scanner scanner = new Scanner(System.in);
         int choice;
+        System.out.println("\nWelcome to the Customer Loyalty Marketplace Application!\n");
         do{
+            System.out.println("---------- Main Menu ----------");
             System.out.println("Enter the choice: \n0. Exit\n1. Admin Login\n2. Brand Login\n3.Customer Login\n");
             choice = scanner.nextInt();
             switch (choice){
                 case 0:
+                    System.out.println("Goodbye!");
                     break;
                 case 1:
-//                    AdminLogin.run(connection);
+                    AdminLogin.run(connection);
                     break;
                 case 2:
 //                    BrandLogin.run(connection);
