@@ -4,16 +4,14 @@ import java.util.Scanner;
 public class DBConnection {
     static final String jdbcURL = "jdbc:oracle:thin:@ora.csc.ncsu.edu:1521:orcl01";
     static Connection connection = null;
-    private static ResultSet result = null;
 
     /**
-     *
      * @param user
      * @param password
      * @throws ClassNotFoundException
      * @throws SQLException
      */
-    private static void setConnection(String user, String password) throws ClassNotFoundException, SQLException{
+    private static void setConnection(String user, String password) throws ClassNotFoundException, SQLException {
         try {
 
             Class.forName("oracle.jdbc.OracleDriver");
@@ -25,7 +23,6 @@ public class DBConnection {
 
                 // Get a connection from the first driver in the
                 // DriverManager list that recognizes the URL jdbcURL
-
                 connection = DriverManager.getConnection(jdbcURL, user, password);
 
                 // Create a statement object that will be sending your
@@ -47,7 +44,7 @@ public class DBConnection {
 //                    System.out.println(s + "   " + n);
 //                }
 
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
 //            finally {
@@ -64,7 +61,7 @@ public class DBConnection {
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
         // connect to the Oracle server
-        setConnection("gzhang26", "200371225");
+        setConnection("", "");
         // todo: how to init Oracle database frame & data by Java?
 //        System.out.println("Need to recreate and reinitiate data tables? 1. NO. 2 Yes");
 //        // if yes, reinitiate the tables
@@ -74,11 +71,11 @@ public class DBConnection {
         Scanner scanner = new Scanner(System.in);
         int choice;
         System.out.println("\nWelcome to the Customer Loyalty Marketplace Application!\n");
-        do{
+        do {
             System.out.println("---------- Main Menu ----------");
-            System.out.println("Enter the choice: \n0. Exit\n1. Admin Login\n2. Brand Login\n3. Customer Login\n");
+            System.out.println("Enter the choice: \n0. Exit\n1. Admin Login\n2. Brand Login\n3. Customer Login\n4. Sign Up\n5. Show Queries\n");
             choice = scanner.nextInt();
-            switch (choice){
+            switch (choice) {
                 case 0:
                     System.out.println("Goodbye!");
                     break;
@@ -86,10 +83,16 @@ public class DBConnection {
                     AdminLogin.run(connection);
                     break;
                 case 2:
-                    BrandLogin.run(connection);
+//                    BrandLogin.run(connection);
                     break;
                 case 3:
-                    CustomerLogin.run(connection);
+//                    CustomerLogin.run(connection);
+                    break;
+                case 4:
+//                    SignUp.run(connection);
+                    break;
+                case 5:
+                    showQueries.run(connection);
                     break;
                 default:
                     System.out.println("Input error, please retry.\n");
