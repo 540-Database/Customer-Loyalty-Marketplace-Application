@@ -36,7 +36,7 @@ public class AdminLogin {
     public static void run(Connection connection) throws SQLException {
         verifyLogin(connection);
         Scanner scanner = new Scanner(System.in);
-
+        scanner.useDelimiter("\n");
         int choice = 0;
         do {
             System.out.println("\n---------- Admin Page ----------");
@@ -76,6 +76,7 @@ public class AdminLogin {
     public static void addBrand(Connection connection) throws SQLException {
         System.out.println("Please enter BrandID, password, name, address. (split by ',')");
         Scanner scanner = new Scanner(System.in);
+        scanner.useDelimiter("\n");
         String input = scanner.nextLine();
         String[] sp = input.split(",");
         if (sp.length != 4) {
@@ -106,6 +107,7 @@ public class AdminLogin {
     public static void addCustomer(Connection connection) throws SQLException {
         System.out.println("Please enter customerID, password, name, phone, address, walletID. (split by ',')");
         Scanner scanner = new Scanner(System.in);
+        scanner.useDelimiter("\n");
         String input = scanner.nextLine();
         String[] sp = input.split(",");
         if (sp.length != 6) {
