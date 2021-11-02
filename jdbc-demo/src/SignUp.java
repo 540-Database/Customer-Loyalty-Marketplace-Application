@@ -39,7 +39,6 @@ public class SignUp {
         if (sp.length != 6) {
             System.out.println("Input format error!!!");
         }
-
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < sp.length; i++) {
             if("NULL".equals(sp[i])){
@@ -60,7 +59,6 @@ public class SignUp {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        // System.out.println(sql);
     }
 
 
