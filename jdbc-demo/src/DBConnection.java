@@ -83,10 +83,10 @@ public class DBConnection {
                     AdminLogin.run(connection);
                     break;
                 case 2:
-//                    BrandLogin.run(connection);
+                    BrandLogin.run(connection);
                     break;
                 case 3:
-//                    CustomerLogin.run(connection);
+                    CustomerLogin.run(connection);
                     break;
                 case 4:
 //                    SignUp.run(connection);
