@@ -87,12 +87,13 @@ public class CustomerLogin {
     public static void enrollLoyaltyPrograms(Connection connection) throws SQLException{
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
+        List<String> loyaltyProgramIds = new ArrayList<>();
 
         // Checking all loyalty programs
         try{
             Statement statement = connection.createStatement();
             ResultSet loyaltyPrograms = statement.executeQuery(String.format("SELECT * FROM REGULARLOYALTYPROGRAM"));
-            List<String> loyaltyProgramIds = new ArrayList<>();
+
             if (!loyaltyPrograms.next()){
                 System.out.println("There are no available loyalty programs currently.");
                 System.out.println("Redirecting to the customer login page...");
@@ -117,7 +118,53 @@ public class CustomerLogin {
             e.printStackTrace();
         }
 
+        System.out.println("Please enter the program id of the program you want to enroll in.");
+        System.out.println("To return to the customer login menu, please enter 0.");
+        while (true) {
+            String loyaltyProgramId = scanner.next().trim();
+            if (loyaltyProgramId.equals("0"))
+                return;
 
+            if (!loyaltyProgramIds.contains(loyaltyProgramId)){
+                System.out.println("Wrong program id entered! Please try again.");
+                continue;
+            }
+            try {
+                Statement statement = connection.createStatement();
+//                ResultSet loyaltyProgramsHasEnrolled = statement.executeQuery(String.format("SELECT LOYALTY_PROGRAM_ID FROM WALLET " +
+//                        "WHERE CUSTOMERID = %s AND LOYALTY_PROGRAM_ID = %s", customerId, loyaltyProgramId));
+                ResultSet loyaltyProgramsHasEnrolled = statement.executeQuery(String.format("SELECT LOYALTY_PROGRAM_ID FROM WALLET " +
+                        "WHERE CUSTOMERID = '%s'", customerId));
+
+//                if (loyaltyProgramsHasEnrolled.next()){
+//                    System.out.println("You have enrolled in all the programs! Redirecting to the customer login menu.");
+//                    return;
+//                }
+
+                while (loyaltyProgramsHasEnrolled.next()){
+                    if (loyaltyProgramId.equals(loyaltyProgramsHasEnrolled.getString(1))){
+                        System.out.println("You have enrolled this program! Redirecting to the customer login menu.");
+                        return;
+                    }
+                }
+
+                String walletId = 'W' + customerId.substring(1);
+                ResultSet resultBrandId = statement.executeQuery(String.format("SELECT BRANDID FROM REGULARLOYALTYPROGRAM WHERE LOYALTY_PROGRAM_ID = '%s'", loyaltyProgramId));
+                resultBrandId.next();
+                String brandId = resultBrandId.getString(1);
+                statement.executeQuery(String.format("INSERT INTO WALLET (walletid, customerid, loyalty_program_id, brandid, points, totalpoints, levelnumber) " +
+                        "VALUES ('%s', '%s', '%s', '%s', 0, 0, 0)", walletId, customerId, loyaltyProgramId, brandId));
+                int customerActivityId = getMaxIDFromCustomerActivities(connection);
+                String now = Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+                statement.executeQuery(String.format("INSERT INTO CUSTOMERACTIVITIES (CUSTOMERACTIVITYID, customerid, brandid, activityid, pointsearned, activitydate) " +
+                        "VALUES (%d, '%s', '%s', 'A00', 0, to_date('%s', 'mm/dd/yyyy'))", customerActivityId, customerId, brandId, now));
+            } catch (SQLException e){
+                e.printStackTrace();
+            }
+
+            System.out.println("Enroll loyalty program success! Redirecting to customer login menu.");
+            return;
+        }
     }
 
     public static void rewardActivities(Connection connection) throws SQLException {
