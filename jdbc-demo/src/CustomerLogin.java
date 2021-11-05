@@ -1,4 +1,6 @@
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -60,6 +62,7 @@ public class CustomerLogin {
                 case 0:
                     break;
                 case 1:
+                    enrollLoyaltyPrograms(connection);
                     break;
                 case 2:
                     rewardActivities(connection);
@@ -79,6 +82,42 @@ public class CustomerLogin {
                     break;
             }
         } while (choice != 0);
+    }
+
+    public static void enrollLoyaltyPrograms(Connection connection) throws SQLException{
+        Scanner scanner = new Scanner(System.in);
+        scanner.useDelimiter("\n");
+
+        // Checking all loyalty programs
+        try{
+            Statement statement = connection.createStatement();
+            ResultSet loyaltyPrograms = statement.executeQuery(String.format("SELECT * FROM REGULARLOYALTYPROGRAM"));
+            List<String> loyaltyProgramIds = new ArrayList<>();
+            if (!loyaltyPrograms.next()){
+                System.out.println("There are no available loyalty programs currently.");
+                System.out.println("Redirecting to the customer login page...");
+                return;
+            } else {
+                System.out.println("---------- Displaying All Validate Loyalty Programs ----------");
+                System.out.println(String.format("%12s %15s %10s ", "Program id", "Program name", "Brand id"));
+                String loyaltyProgramId = loyaltyPrograms.getString(1);
+                String loyaltyProgramName = loyaltyPrograms.getString(2);
+                String loyaltyProgramBrandId = loyaltyPrograms.getString(3);
+                System.out.println(String.format("%12s %15s %10s", loyaltyProgramId, loyaltyProgramName, loyaltyProgramBrandId));
+                loyaltyProgramIds.add(loyaltyProgramId);
+                while (loyaltyPrograms.next()){
+                    loyaltyProgramId = loyaltyPrograms.getString(1);
+                    loyaltyProgramName = loyaltyPrograms.getString(2);
+                    loyaltyProgramBrandId = loyaltyPrograms.getString(3);
+                    System.out.println(String.format("%12s %15s %10s", loyaltyProgramId, loyaltyProgramName, loyaltyProgramBrandId));
+                    loyaltyProgramIds.add(loyaltyProgramId);
+                }
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+
+
     }
 
     public static void rewardActivities(Connection connection) throws SQLException {
