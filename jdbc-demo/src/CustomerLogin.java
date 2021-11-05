@@ -158,7 +158,7 @@ public class CustomerLogin {
                 updateTier(connection);
                 break;
             case "A03":
-                //refer(connection);
+                refer(connection);
                 updateTier(connection);
                 updateTier(connection);
                 break;
@@ -255,6 +255,54 @@ public class CustomerLogin {
             String sql4 = String.format("insert into REVIEWRECORD(customeractivityid, customerid, brandid, review, reviewdate, recode, versionnumber)" +
                     " VALUES (%d, '%s', '%s',  '%s', to_date('%s', 'mm/dd/yyyy'), '%s', %d)", newId, customerId, brandId, review, now, RECode, version);
             connection.createStatement().executeUpdate(sql4);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public static void refer(Connection connection) throws SQLException {
+        Scanner scanner = new Scanner(System.in);
+        scanner.useDelimiter("\n");
+        String referId = "";
+        while (true) {
+            System.out.println("Please enter the customer id you want to refer");
+            try {
+                referId = scanner.next();
+                break;
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please try again.");
+            }
+        }
+        String sql = String.format("SELECT R.POINTS FROM RERULES R, ACTIVITY A WHERE R.ACTIVITYID = A.ACTIVITYID " +
+                "and R.LOYALTY_PROGRAM_ID = '%s' and A.ACTIVITYID = '%s' and STATUS = 1", loyaltyProgramId, activityId);
+
+        String RECode = getRECode(connection);
+        int version = getREVersion(connection);
+        double multiplier = getMultiplier(connection);
+
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            resultSet.next();
+            double points = resultSet.getDouble(1);
+            points = multiplier * points;
+            System.out.println("You have earned " + points + " points");
+            String sql2 = String.format("UPDATE WALLET" +
+                    " SET POINTS = POINTS + %f," +
+                    " TOTALPOINTS = TOTALPOINTS + %f" +
+                    " WHERE CUSTOMERID = '%s'" +
+                    " and LOYALTY_PROGRAM_ID = '%s'", points, points, customerId, loyaltyProgramId);
+            connection.createStatement().executeUpdate(sql2);
+
+            int newId = getMaxIDFromCustomerActivities(connection);
+            String now = Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+            String sql3 = String.format("insert into CUSTOMERACTIVITIES (CUSTOMERACTIVITYID, CUSTOMERID, BRANDID, ACTIVITYID, POINTSEARNED, ACTIVITYDATE)" +
+                    " values (%d, '%s', '%s', '%s', %f, to_date('%s', 'mm/dd/yyyy'))", newId, customerId, brandId, activityId, points, now);
+            connection.createStatement().executeUpdate(sql3);
+
+//            String sql4 = String.format("insert into REVIEWRECORD(customeractivityid, customerid, brandid, review, reviewdate, recode, versionnumber)" +
+//                    " VALUES (%d, '%s', '%s',  '%s', to_date('%s', 'mm/dd/yyyy'), '%s', %d)", newId, customerId, brandId, review, now, RECode, version);
+//            connection.createStatement().executeUpdate(sql4);
         } catch (SQLException e) {
             e.printStackTrace();
         }
