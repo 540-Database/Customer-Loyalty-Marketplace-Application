@@ -1,12 +1,21 @@
 import java.sql.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
 public class CustomerLogin {
-    static String customerId = null;
+    static String customerId;
+    static String loyaltyProgramId;
+    static String activityId;
+    static String brandId;
 
     public static void verifyLogin(Connection connection) {
+        customerId = null;
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
         while (true) {
@@ -73,14 +82,53 @@ public class CustomerLogin {
     }
 
     public static void rewardActivities(Connection connection) throws SQLException {
+        loyaltyProgramId = null;
+        activityId = null;
+        brandId = null;
+
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
         String sql = String.format("SELECT LOYALTY_PROGRAM_ID FROM WALLET WHERE CUSTOMERID = '%s'", customerId);
-
+        List<String> LOYALTY_PROGRAM_IDs = new ArrayList<>();
         try {
             ResultSet resultSet = connection.createStatement().executeQuery(sql);
             System.out.println("LOYALTY_PROGRAM_ID");
             while (resultSet.next()) {
+                System.out.println(resultSet.getString(1));
+                LOYALTY_PROGRAM_IDs.add(resultSet.getString(1));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        do {
+            System.out.println("Please enter the exact Loyalty Program ID from above choices or input 0 to exit");
+            loyaltyProgramId = scanner.next();
+            if (loyaltyProgramId.equals("0")) {
+                return;
+            }
+        } while (!LOYALTY_PROGRAM_IDs.contains(loyaltyProgramId));
+
+
+        String sqlForBrandId = String.format("SELECT BRANDID FROM REGULARLOYALTYPROGRAM WHERE LOYALTY_PROGRAM_ID = '%s'", loyaltyProgramId);
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sqlForBrandId);
+            resultSet.next();
+            brandId = resultSet.getString(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        String sql2 = String.format("SELECT DISTINCT A.ACTIVITYID, A.ACTIVITYNAME " +
+                "FROM RERULES R, ACTIVITY A WHERE R.ACTIVITYID = A.ACTIVITYID " +
+                "and R.LOYALTY_PROGRAM_ID = '%s'", loyaltyProgramId);
+        List<String> activityIds = new ArrayList<>();
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql2);
+            while (resultSet.next()) {
+                activityIds.add(resultSet.getString(1));
                 System.out.println(resultSet.getString(1));
             }
         } catch (SQLException e) {
@@ -88,58 +136,117 @@ public class CustomerLogin {
             return;
         }
 
-        System.out.println("Please select loyalty programs");
-        String loyaltyProgramId = scanner.next();
-        String sql2 = String.format("SELECT DISTINCT ACTIVITYID FROM RERULES WHERE LOYALTY_PROGRAM_ID = '%s'", loyaltyProgramId);
-        List<String> activityIds = new ArrayList<>();
-        try {
-            ResultSet resultSet = connection.createStatement().executeQuery(sql2);
-            while (resultSet.next()) {
-                activityIds.add(resultSet.getString(1));
+        activityId = null;
+        do {
+            System.out.println("Please enter the exact Activity ID from above choices or input 0 to exit");
+            activityId = scanner.next();
+            if (activityId.equals("0")) {
+                return;
             }
+        } while (!activityIds.contains(activityId));
+
+
+        switch (activityId) {
+            case "A01":
+                purchase(connection);
+                break;
+            case "A02":
+                //review(connection);
+                break;
+            case "A03":
+                // refer(connection);
+                break;
+        }
+    }
+
+
+    public static void purchase(Connection connection) throws SQLException {
+        Scanner scanner = new Scanner(System.in);
+        scanner.useDelimiter("\n");
+        double amount;
+        while (true) {
+            System.out.println("Please enter the amount of purchase");
+            try {
+                amount = scanner.nextDouble();
+                break;
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please try again.");
+            }
+        }
+
+        String sql = String.format("SELECT R.POINTS FROM RERULES R, ACTIVITY A WHERE R.ACTIVITYID = A.ACTIVITYID " +
+                "and R.LOYALTY_PROGRAM_ID = '%s' and A.ACTIVITYID = '%s' and STATUS = 1", loyaltyProgramId, activityId);
+
+        String RECode = getRECode(connection);
+        int version = getREVersion(connection);
+
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            resultSet.next();
+            double points = resultSet.getDouble(1);
+            points = points * amount / 100;
+            System.out.println("You have earned " + points + " points");
+            String sql2 = String.format("UPDATE WALLET" +
+                    " SET POINTS = POINTS + %f," +
+                    " TOTALPOINTS = TOTALPOINTS + %f" +
+                    " WHERE CUSTOMERID = '%s'" +
+                    " and LOYALTY_PROGRAM_ID = '%s'", points, points, customerId, loyaltyProgramId);
+            connection.createStatement().executeUpdate(sql2);
+
+            int newId = getMaxIDFromCustomerActivities(connection);
+            String now = Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+            String sql3 = String.format("insert into CUSTOMERACTIVITIES (CUSTOMERACTIVITYID, CUSTOMERID, BRANDID, ACTIVITYID, POINTSEARNED, ACTIVITYDATE)" +
+                    " values (%d, '%s', '%s', '%s', %f, to_date('%s', 'mm/dd/yyyy'))", newId, customerId, brandId, activityId, points, now);
+            connection.createStatement().executeUpdate(sql3);
+
+            String sql4 = String.format("insert into PURCHASERECORD(customeractivityid, customerid, brandid, moneyspent, pointsearned, giftcardused, totalamount, purchasedate, recode, versionnumber)" +
+                    " VALUES (%d, '%s', '%s',  %f, %f, %d, %f, to_date('%s', 'mm/dd/yyyy'), '%s', %d)", newId, customerId, brandId, amount, points, 0, amount, now, RECode, version);
+            connection.createStatement().executeUpdate(sql4);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        // todo: if error, stay in this page
+    }
 
-
-        List<String> activityNames = new ArrayList<>();
-        for (String activityId : activityIds) {
-            String sql3 = String.format("SELECT ACTIVITYNAME FROM ACTIVITY WHERE ACTIVITYID = '%s'", activityId);
-            try {
-                ResultSet resultSet = connection.createStatement().executeQuery(sql3);
-                while (resultSet.next()) {
-                    activityNames.add(resultSet.getString(1));
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+    public static int getMaxIDFromCustomerActivities(Connection connection) {
+        String sql = "SELECT MAX(CUSTOMERACTIVITYID) FROM CUSTOMERACTIVITIES";
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            resultSet.next();
+            return resultSet.getInt(1) + 1;
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+        return 1;
+    }
 
+    public static String getRECode(Connection connection) {
+        String sql = String.format("SELECT R.RECODE FROM RERULES R, ACTIVITY A WHERE R.ACTIVITYID = A.ACTIVITYID " +
+                "and R.LOYALTY_PROGRAM_ID = '%s' and A.ACTIVITYID = '%s' and STATUS = 1", loyaltyProgramId, activityId);
+        String RECode = "";
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            resultSet.next();
+            RECode = resultSet.getString(1);
 
-        do {
-            System.out.println("Please select activities");
-            for (int i = 0; i < activityNames.size(); i++) {
-                System.out.println(i + ". " + activityNames.get(i));
-            }
-            System.out.println(activityNames.size() + ". Back");
-            int activityId = scanner.nextInt();
-            if (activityId == activityNames.size()) {
-                break;
-            }
-            String ActivityId = scanner.next().trim();
-            switch (ActivityId){
-                case "A01":
-                    purchase(connection, loyaltyProgramId);
-                    break;
-                case "A02":
-                    break;
-                case "A03":
-                    break;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return RECode;
+    }
 
-            }
+    public static int getREVersion(Connection connection) {
+        String sql = String.format("SELECT R.VERSIONNUMBER FROM RERULES R, ACTIVITY A WHERE R.ACTIVITYID = A.ACTIVITYID " +
+                "and R.LOYALTY_PROGRAM_ID = '%s' and A.ACTIVITYID = '%s' and STATUS = 1", loyaltyProgramId, activityId);
+        int version = 0;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            resultSet.next();
+            version = resultSet.getInt(1);
 
-        } while (true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return version;
     }
 
 
