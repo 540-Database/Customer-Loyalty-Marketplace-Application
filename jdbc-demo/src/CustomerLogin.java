@@ -50,7 +50,7 @@ public class CustomerLogin {
         verifyLogin(connection);
         Scanner scanner = new Scanner(System.in);
 
-        int choice = 0;
+        int choice;
         do {
             System.out.println("\n---------- Customer Main Page ----------");
             System.out.println("Please enter your option: ");
@@ -59,8 +59,6 @@ public class CustomerLogin {
 
             choice = scanner.nextInt();
             switch (choice) {
-                case 0:
-                    break;
                 case 1:
                     enrollLoyaltyPrograms(connection);
                     break;
@@ -73,15 +71,11 @@ public class CustomerLogin {
                     break;
                 case 5:
                     break;
-                case 6:
-                    break;
-                case 7:
-                    break;
                 default:
                     System.out.println("Invaild option entered. Please try again.");
                     break;
             }
-        } while (choice != 0);
+        } while (choice != 5);
     }
 
     public static void enrollLoyaltyPrograms(Connection connection) throws SQLException{
@@ -131,15 +125,8 @@ public class CustomerLogin {
             }
             try {
                 Statement statement = connection.createStatement();
-//                ResultSet loyaltyProgramsHasEnrolled = statement.executeQuery(String.format("SELECT LOYALTY_PROGRAM_ID FROM WALLET " +
-//                        "WHERE CUSTOMERID = %s AND LOYALTY_PROGRAM_ID = %s", customerId, loyaltyProgramId));
                 ResultSet loyaltyProgramsHasEnrolled = statement.executeQuery(String.format("SELECT LOYALTY_PROGRAM_ID FROM WALLET " +
                         "WHERE CUSTOMERID = '%s'", customerId));
-
-//                if (loyaltyProgramsHasEnrolled.next()){
-//                    System.out.println("You have enrolled in all the programs! Redirecting to the customer login menu.");
-//                    return;
-//                }
 
                 while (loyaltyProgramsHasEnrolled.next()){
                     if (loyaltyProgramId.equals(loyaltyProgramsHasEnrolled.getString(1))){
