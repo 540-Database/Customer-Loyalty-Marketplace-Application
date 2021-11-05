@@ -149,6 +149,8 @@ public class CustomerLogin {
         switch (activityId) {
             case "A01":
                 purchase(connection);
+                updateTier(connection);
+                updateTier(connection);
                 break;
             case "A02":
                 //review(connection);
@@ -179,12 +181,12 @@ public class CustomerLogin {
 
         String RECode = getRECode(connection);
         int version = getREVersion(connection);
-
+        double multiplier = getMultiplier(connection);
         try {
             ResultSet resultSet = connection.createStatement().executeQuery(sql);
             resultSet.next();
             double points = resultSet.getDouble(1);
-            points = points * amount / 100;
+            points = multiplier * points * amount / 100;
             System.out.println("You have earned " + points + " points");
             String sql2 = String.format("UPDATE WALLET" +
                     " SET POINTS = POINTS + %f," +
@@ -249,5 +251,101 @@ public class CustomerLogin {
         return version;
     }
 
+    public static double getMultiplier(Connection connection) {
+        String sql = String.format("select ISTIERED " +
+                "from REGULARLOYALTYPROGRAM " +
+                "where LOYALTY_PROGRAM_ID = '%s'", loyaltyProgramId);
+        int ISTIERED = 0;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            resultSet.next();
+            ISTIERED = resultSet.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
+        if (ISTIERED == 0) {
+            return 1;
+        }
+
+        String sql2 = String.format("select LEVELNUMBER from WALLET where CUSTOMERID = '%s' and LOYALTY_PROGRAM_ID = '%s'", customerId, loyaltyProgramId);
+        int levelNumber = 1;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql2);
+            resultSet.next();
+            levelNumber = resultSet.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        double multiplier = 1;
+        String sql3 = String.format("select MULTIPLIER from TIEREDPROGRAM where LOYALTY_PROGRAM_ID = '%s' and LEVELNUMBER = %d", loyaltyProgramId, levelNumber);
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql3);
+            resultSet.next();
+            multiplier = resultSet.getDouble(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return multiplier;
+    }
+
+    public static void updateTier(Connection connection) {
+        String sql1 = String.format("select LEVELNUMBER from WALLET where CUSTOMERID = '%s' and LOYALTY_PROGRAM_ID = '%s'", customerId, loyaltyProgramId);
+        int levelNumber = 1;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql1);
+            resultSet.next();
+            levelNumber = resultSet.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        String sql2 = String.format("select max(LEVELNUMBER) from TIEREDPROGRAM where LOYALTY_PROGRAM_ID = '%s'", loyaltyProgramId);
+        int maxnumber = 3;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql2);
+            resultSet.next();
+            maxnumber = resultSet.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (levelNumber == maxnumber) {
+            return;
+        }
+
+        int nextLevelNumber = levelNumber + 1;
+        String sql3 = String.format("select POINTSREQUIRED from TIEREDPROGRAM where LOYALTY_PROGRAM_ID='%s' and LEVELNUMBER = %d", loyaltyProgramId, nextLevelNumber);
+        int pointsRequired = 0;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql3);
+            resultSet.next();
+            pointsRequired = resultSet.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String sql4 = String.format("select TOTALPOINTS from WALLET where CUSTOMERID = '%s' and LOYALTY_PROGRAM_ID = '%s'", customerId, loyaltyProgramId);
+        int totalPoints = 0;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql4);
+            resultSet.next();
+            totalPoints = resultSet.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (totalPoints < pointsRequired) {
+            return;
+        }
+
+        String sql5 = String.format("update WALLET set LEVELNUMBER = %d where CUSTOMERID = '%s' and LOYALTY_PROGRAM_ID = '%s'", nextLevelNumber, customerId, loyaltyProgramId);
+        try {
+            connection.createStatement().executeUpdate(sql5);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
