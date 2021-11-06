@@ -16,7 +16,7 @@ public class CustomerLogin {
     static String activityId;
     static String brandId;
 
-    public static void verifyLogin(Connection connection) {
+    public static boolean verifyLogin(Connection connection) {
         customerId = null;
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
@@ -25,7 +25,7 @@ public class CustomerLogin {
             System.out.println("To return to the root menu, please enter 0.");
             String idAndPassword = scanner.next();
             if (idAndPassword.equals("0"))
-                return;
+                return false;
             ResultSet resultSet = null;
             try {
                 String[] idAndPasswordSplit = idAndPassword.split(",");
@@ -44,10 +44,13 @@ public class CustomerLogin {
                 e.printStackTrace();
             }
         }
+        return true;
     }
 
     public static void run(Connection connection) throws SQLException {
-        verifyLogin(connection);
+        if (!verifyLogin(connection)){
+            return;
+        }
         Scanner scanner = new Scanner(System.in);
 
         int choice;
@@ -68,7 +71,6 @@ public class CustomerLogin {
                 case 3:
                     break;
                 case 4:
-                    redeem(connection);
                     break;
                 case 5:
                     break;
@@ -223,12 +225,18 @@ public class CustomerLogin {
         switch (activityId) {
             case "A01":
                 purchase(connection);
+                updateTier(connection);
+                updateTier(connection);
                 break;
             case "A02":
-                //review(connection);
+                review(connection);
+                updateTier(connection);
+                updateTier(connection);
                 break;
             case "A03":
-                // refer(connection);
+                refer(connection);
+                updateTier(connection);
+                updateTier(connection);
                 break;
         }
     }
@@ -252,12 +260,12 @@ public class CustomerLogin {
 
         String RECode = getRECode(connection);
         int version = getREVersion(connection);
-
+        double multiplier = getMultiplier(connection);
         try {
             ResultSet resultSet = connection.createStatement().executeQuery(sql);
             resultSet.next();
             double points = resultSet.getDouble(1);
-            points = points * amount / 100;
+            points = multiplier * points * amount / 100;
             System.out.println("You have earned " + points + " points");
             String sql2 = String.format("UPDATE WALLET" +
                     " SET POINTS = POINTS + %f," +
@@ -279,6 +287,102 @@ public class CustomerLogin {
             e.printStackTrace();
         }
     }
+
+    public static void review(Connection connection) throws SQLException {
+        Scanner scanner = new Scanner(System.in);
+        scanner.useDelimiter("\n");
+        String review = "";
+        while (true) {
+            System.out.println("Please enter the review");
+            try {
+                review = scanner.next();
+                break;
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please try again.");
+            }
+        }
+        String sql = String.format("SELECT R.POINTS FROM RERULES R, ACTIVITY A WHERE R.ACTIVITYID = A.ACTIVITYID " +
+                "and R.LOYALTY_PROGRAM_ID = '%s' and A.ACTIVITYID = '%s' and STATUS = 1", loyaltyProgramId, activityId);
+
+        String RECode = getRECode(connection);
+        int version = getREVersion(connection);
+        double multiplier = getMultiplier(connection);
+
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            resultSet.next();
+            double points = resultSet.getDouble(1);
+            points = multiplier * points;
+            System.out.println("You have earned " + points + " points");
+            String sql2 = String.format("UPDATE WALLET" +
+                    " SET POINTS = POINTS + %f," +
+                    " TOTALPOINTS = TOTALPOINTS + %f" +
+                    " WHERE CUSTOMERID = '%s'" +
+                    " and LOYALTY_PROGRAM_ID = '%s'", points, points, customerId, loyaltyProgramId);
+            connection.createStatement().executeUpdate(sql2);
+
+            int newId = getMaxIDFromCustomerActivities(connection);
+            String now = Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+            String sql3 = String.format("insert into CUSTOMERACTIVITIES (CUSTOMERACTIVITYID, CUSTOMERID, BRANDID, ACTIVITYID, POINTSEARNED, ACTIVITYDATE)" +
+                    " values (%d, '%s', '%s', '%s', %f, to_date('%s', 'mm/dd/yyyy'))", newId, customerId, brandId, activityId, points, now);
+            connection.createStatement().executeUpdate(sql3);
+
+            String sql4 = String.format("insert into REVIEWRECORD(customeractivityid, customerid, brandid, review, reviewdate, recode, versionnumber)" +
+                    " VALUES (%d, '%s', '%s',  '%s', to_date('%s', 'mm/dd/yyyy'), '%s', %d)", newId, customerId, brandId, review, now, RECode, version);
+            connection.createStatement().executeUpdate(sql4);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public static void refer(Connection connection) throws SQLException {
+        Scanner scanner = new Scanner(System.in);
+        scanner.useDelimiter("\n");
+        String referId = "";
+        while (true) {
+            System.out.println("Please enter the customer id you want to refer");
+            try {
+                referId = scanner.next();
+                break;
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please try again.");
+            }
+        }
+        String sql = String.format("SELECT R.POINTS FROM RERULES R, ACTIVITY A WHERE R.ACTIVITYID = A.ACTIVITYID " +
+                "and R.LOYALTY_PROGRAM_ID = '%s' and A.ACTIVITYID = '%s' and STATUS = 1", loyaltyProgramId, activityId);
+
+        String RECode = getRECode(connection);
+        int version = getREVersion(connection);
+        double multiplier = getMultiplier(connection);
+
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            resultSet.next();
+            double points = resultSet.getDouble(1);
+            points = multiplier * points;
+            System.out.println("You have earned " + points + " points");
+            String sql2 = String.format("UPDATE WALLET" +
+                    " SET POINTS = POINTS + %f," +
+                    " TOTALPOINTS = TOTALPOINTS + %f" +
+                    " WHERE CUSTOMERID = '%s'" +
+                    " and LOYALTY_PROGRAM_ID = '%s'", points, points, customerId, loyaltyProgramId);
+            connection.createStatement().executeUpdate(sql2);
+
+            int newId = getMaxIDFromCustomerActivities(connection);
+            String now = Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+            String sql3 = String.format("insert into CUSTOMERACTIVITIES (CUSTOMERACTIVITYID, CUSTOMERID, BRANDID, ACTIVITYID, POINTSEARNED, ACTIVITYDATE)" +
+                    " values (%d, '%s', '%s', '%s', %f, to_date('%s', 'mm/dd/yyyy'))", newId, customerId, brandId, activityId, points, now);
+            connection.createStatement().executeUpdate(sql3);
+
+//            String sql4 = String.format("insert into REVIEWRECORD(customeractivityid, customerid, brandid, review, reviewdate, recode, versionnumber)" +
+//                    " VALUES (%d, '%s', '%s',  '%s', to_date('%s', 'mm/dd/yyyy'), '%s', %d)", newId, customerId, brandId, review, now, RECode, version);
+//            connection.createStatement().executeUpdate(sql4);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static int getMaxIDFromCustomerActivities(Connection connection) {
         String sql = "SELECT MAX(CUSTOMERACTIVITYID) FROM CUSTOMERACTIVITIES";
@@ -322,8 +426,101 @@ public class CustomerLogin {
         return version;
     }
 
-    public static void redeem(Connection connection){
+    public static double getMultiplier(Connection connection) {
+        String sql = String.format("select ISTIERED " +
+                "from REGULARLOYALTYPROGRAM " +
+                "where LOYALTY_PROGRAM_ID = '%s'", loyaltyProgramId);
+        int ISTIERED = 0;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            resultSet.next();
+            ISTIERED = resultSet.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
+        if (ISTIERED == 0) {
+            return 1;
+        }
+
+        String sql2 = String.format("select LEVELNUMBER from WALLET where CUSTOMERID = '%s' and LOYALTY_PROGRAM_ID = '%s'", customerId, loyaltyProgramId);
+        int levelNumber = 1;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql2);
+            resultSet.next();
+            levelNumber = resultSet.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        double multiplier = 1;
+        String sql3 = String.format("select MULTIPLIER from TIEREDPROGRAM where LOYALTY_PROGRAM_ID = '%s' and LEVELNUMBER = %d", loyaltyProgramId, levelNumber);
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql3);
+            resultSet.next();
+            multiplier = resultSet.getDouble(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return multiplier;
     }
 
+    public static void updateTier(Connection connection) {
+        String sql1 = String.format("select LEVELNUMBER from WALLET where CUSTOMERID = '%s' and LOYALTY_PROGRAM_ID = '%s'", customerId, loyaltyProgramId);
+        int levelNumber = 1;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql1);
+            resultSet.next();
+            levelNumber = resultSet.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        String sql2 = String.format("select max(LEVELNUMBER) from TIEREDPROGRAM where LOYALTY_PROGRAM_ID = '%s'", loyaltyProgramId);
+        int maxnumber = 3;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql2);
+            resultSet.next();
+            maxnumber = resultSet.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (levelNumber == maxnumber) {
+            return;
+        }
+
+        int nextLevelNumber = levelNumber + 1;
+        String sql3 = String.format("select POINTSREQUIRED from TIEREDPROGRAM where LOYALTY_PROGRAM_ID='%s' and LEVELNUMBER = %d", loyaltyProgramId, nextLevelNumber);
+        int pointsRequired = 0;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql3);
+            resultSet.next();
+            pointsRequired = resultSet.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String sql4 = String.format("select TOTALPOINTS from WALLET where CUSTOMERID = '%s' and LOYALTY_PROGRAM_ID = '%s'", customerId, loyaltyProgramId);
+        int totalPoints = 0;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql4);
+            resultSet.next();
+            totalPoints = resultSet.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (totalPoints < pointsRequired) {
+            return;
+        }
+
+        String sql5 = String.format("update WALLET set LEVELNUMBER = %d where CUSTOMERID = '%s' and LOYALTY_PROGRAM_ID = '%s'", nextLevelNumber, customerId, loyaltyProgramId);
+        try {
+            connection.createStatement().executeUpdate(sql5);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
