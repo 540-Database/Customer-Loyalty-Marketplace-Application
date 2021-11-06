@@ -2,12 +2,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.InputMismatchException;
-import java.util.List;
 import java.util.Scanner;
 
 public class CustomerLogin {
@@ -48,7 +45,7 @@ public class CustomerLogin {
     }
 
     public static void run(Connection connection) throws SQLException {
-        if (!verifyLogin(connection)){
+        if (!verifyLogin(connection)) {
             return;
         }
         Scanner scanner = new Scanner(System.in);
@@ -81,17 +78,17 @@ public class CustomerLogin {
         } while (choice != 5);
     }
 
-    public static void enrollLoyaltyPrograms(Connection connection) throws SQLException{
+    public static void enrollLoyaltyPrograms(Connection connection) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
         List<String> loyaltyProgramIds = new ArrayList<>();
 
         // Checking all loyalty programs
-        try{
+        try {
             Statement statement = connection.createStatement();
             ResultSet loyaltyPrograms = statement.executeQuery(String.format("SELECT * FROM REGULARLOYALTYPROGRAM"));
 
-            if (!loyaltyPrograms.next()){
+            if (!loyaltyPrograms.next()) {
                 System.out.println("There are no available loyalty programs currently.");
                 System.out.println("Redirecting to the customer login page...");
                 return;
@@ -103,7 +100,7 @@ public class CustomerLogin {
                 String loyaltyProgramBrandId = loyaltyPrograms.getString(3);
                 System.out.println(String.format("%12s %15s %10s", loyaltyProgramId, loyaltyProgramName, loyaltyProgramBrandId));
                 loyaltyProgramIds.add(loyaltyProgramId);
-                while (loyaltyPrograms.next()){
+                while (loyaltyPrograms.next()) {
                     loyaltyProgramId = loyaltyPrograms.getString(1);
                     loyaltyProgramName = loyaltyPrograms.getString(2);
                     loyaltyProgramBrandId = loyaltyPrograms.getString(3);
@@ -111,7 +108,7 @@ public class CustomerLogin {
                     loyaltyProgramIds.add(loyaltyProgramId);
                 }
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -122,7 +119,7 @@ public class CustomerLogin {
             if (loyaltyProgramId.equals("0"))
                 return;
 
-            if (!loyaltyProgramIds.contains(loyaltyProgramId)){
+            if (!loyaltyProgramIds.contains(loyaltyProgramId)) {
                 System.out.println("Wrong program id entered! Please try again.");
                 continue;
             }
@@ -131,8 +128,8 @@ public class CustomerLogin {
                 ResultSet loyaltyProgramsHasEnrolled = statement.executeQuery(String.format("SELECT LOYALTY_PROGRAM_ID FROM WALLET " +
                         "WHERE CUSTOMERID = '%s'", customerId));
 
-                while (loyaltyProgramsHasEnrolled.next()){
-                    if (loyaltyProgramId.equals(loyaltyProgramsHasEnrolled.getString(1))){
+                while (loyaltyProgramsHasEnrolled.next()) {
+                    if (loyaltyProgramId.equals(loyaltyProgramsHasEnrolled.getString(1))) {
                         System.out.println("You have enrolled this program! Redirecting to the customer login menu.");
                         return;
                     }
@@ -148,7 +145,7 @@ public class CustomerLogin {
                 String now = Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
                 statement.executeQuery(String.format("INSERT INTO CUSTOMERACTIVITIES (CUSTOMERACTIVITYID, customerid, brandid, activityid, pointsearned, activitydate) " +
                         "VALUES (%d, '%s', '%s', 'A00', 0, to_date('%s', 'mm/dd/yyyy'))", customerActivityId, customerId, brandId, now));
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
 
@@ -256,6 +253,37 @@ public class CustomerLogin {
             }
         }
 
+        int giftCardAmount = getGiftCardAmount(connection);
+        int toBeUsedGCCount = 0;
+        if (giftCardAmount > 0) {
+            System.out.println("You have " + giftCardAmount + " gift cards" + "in your wallet.Do you want to use it ? ");
+            System.out.println("If you want to use, please enter the number of gift cards you want to use");
+            System.out.println("One gift card is worth $100");
+            System.out.println("If you don't want to use, please enter 0");
+            while (true) {
+                try {
+                    toBeUsedGCCount = scanner.nextInt();
+                    if (toBeUsedGCCount == 0) {
+                        break;
+                    }
+                    if (toBeUsedGCCount > giftCardAmount) {
+                        System.out.println("You don't have enough gift cards in your wallet");
+                    } else if (toBeUsedGCCount < 0) {
+                        System.out.println("Invalid input. Please try again.");
+                    } else {
+                        break;
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println("Invalid input. Please try again.");
+                }
+            }
+        }
+
+        double actualAmout = amount - 100 * toBeUsedGCCount;
+        if (toBeUsedGCCount > 0) {
+            updateWalletReward(connection, toBeUsedGCCount);
+        }
+
         String sql = String.format("SELECT R.POINTS FROM RERULES R, ACTIVITY A WHERE R.ACTIVITYID = A.ACTIVITYID " +
                 "and R.LOYALTY_PROGRAM_ID = '%s' and A.ACTIVITYID = '%s' and STATUS = 1", loyaltyProgramId, activityId);
 
@@ -266,7 +294,7 @@ public class CustomerLogin {
             ResultSet resultSet = connection.createStatement().executeQuery(sql);
             resultSet.next();
             double points = resultSet.getDouble(1);
-            points = multiplier * points * amount / 100;
+            points = multiplier * points * actualAmout / 100;
             System.out.println("You have earned " + points + " points");
             String sql2 = String.format("UPDATE WALLET" +
                     " SET POINTS = POINTS + %f," +
@@ -282,7 +310,7 @@ public class CustomerLogin {
             connection.createStatement().executeUpdate(sql3);
 
             String sql4 = String.format("insert into PURCHASERECORD(customeractivityid, customerid, brandid, moneyspent, pointsearned, giftcardused, totalamount, purchasedate, recode, versionnumber)" +
-                    " VALUES (%d, '%s', '%s',  %f, %f, %d, %f, to_date('%s', 'mm/dd/yyyy'), '%s', %d)", newId, customerId, brandId, amount, points, 0, amount, now, RECode, version);
+                    " VALUES (%d, '%s', '%s',  %f, %f, %d, %f, to_date('%s', 'mm/dd/yyyy'), '%s', %d)", newId, customerId, brandId, actualAmout, points, toBeUsedGCCount, amount, now, RECode, version);
             connection.createStatement().executeUpdate(sql4);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -384,6 +412,31 @@ public class CustomerLogin {
         }
     }
 
+
+    public static int getGiftCardAmount(Connection connection) {
+        String sql = String.format("select QUANTITY " +
+                "from WALLETREWARDS " +
+                "where CUSTOMERID = '%s' and BRANDID = '%s' and REWARDID = 'R01'", customerId, brandId);
+        int amount = 0;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            if (resultSet.next()) {
+                amount = resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return amount;
+    }
+
+    public static void updateWalletReward(Connection connection, int amount) {
+        String sql = String.format("update WALLETREWARDS set QUANTITY = QUANTITY - %d where CUSTOMERID = '%s' and BRANDID = '%s' and REWARDID = 'R01'", amount, customerId, brandId);
+        try {
+            connection.createStatement().executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static int getMaxIDFromCustomerActivities(Connection connection) {
         String sql = "SELECT MAX(CUSTOMERACTIVITYID) FROM CUSTOMERACTIVITIES";

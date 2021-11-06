@@ -61,7 +61,7 @@ public class DBConnection {
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
         // connect to the Oracle server
-        setConnection("", "");
+        setConnection("zma24", "abcd1234");
         // todo: how to init Oracle database frame & data by Java?
 //        System.out.println("Need to recreate and reinitiate data tables? 1. NO. 2 Yes");
 //        // if yes, reinitiate the tables
