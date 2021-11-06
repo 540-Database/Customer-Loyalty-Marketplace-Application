@@ -179,7 +179,7 @@ public class CustomerLogin {
         }
 
         do {
-            System.out.println("Please enter the exact Loyalty Program ID from above choices or input 0 to exit");
+            System.out.println("Please enter the exact Loyalty Program ID from above choices or enter 0 to exit");
             loyaltyProgramId = scanner.next();
             if (loyaltyProgramId.equals("0")) {
                 return;
@@ -215,7 +215,7 @@ public class CustomerLogin {
 
         activityId = null;
         do {
-            System.out.println("Please enter the exact Activity ID from above choices or input 0 to exit");
+            System.out.println("Please enter the exact Activity ID from above choices or enter 0 to exit");
             activityId = scanner.next();
             if (activityId.equals("0")) {
                 return;
@@ -285,25 +285,28 @@ public class CustomerLogin {
         int giftCardAmount = getGiftCardAmount(connection);
         int toBeUsedGCCount = 0;
         if (giftCardAmount > 0 && amount >= 100) {
-            System.out.println("You have " + giftCardAmount + " gift cards " + "in your wallet.Do you want to use it? ");
-            System.out.println("If you want to use, please enter the number of gift cards you want to use");
-            System.out.println("One gift card is worth $100");
-            System.out.println("If you don't want to use, please enter 0");
             while (true) {
+                System.out.println("You have " + giftCardAmount + " gift cards " + "in your wallet. Do you want to use it? ");
+                System.out.println("If you want to use, please enter the number of gift cards you want to use");
+                System.out.println("One gift card is worth $100");
+                System.out.println("If you don't want to use, please enter 0");
+
                 try {
                     toBeUsedGCCount = scanner.nextInt();
                     if (toBeUsedGCCount == 0) {
                         break;
                     }
                     if (toBeUsedGCCount > giftCardAmount) {
-                        System.out.println("You don't have enough gift cards in your wallet");
+                        System.out.println("You don't have enough gift cards in your wallet\n");
+                    } else if (toBeUsedGCCount * 100 > amount) {
+                        System.out.println("The value of gift cards is more than your purchase amount\n");
                     } else if (toBeUsedGCCount < 0) {
-                        System.out.println("Invalid input. Please try again.");
+                        System.out.println("Invalid input. Please try again\n");
                     } else {
                         break;
                     }
                 } catch (InputMismatchException e) {
-                    System.out.println("Invalid input. Please try again.");
+                    System.out.println("Invalid input. Please try again\n");
                 }
             }
         }
