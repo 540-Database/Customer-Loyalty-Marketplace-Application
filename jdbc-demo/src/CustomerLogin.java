@@ -21,8 +21,9 @@ public class CustomerLogin {
             System.out.println("Please enter customer's user id and password, split with comma:");
             System.out.println("To return to the root menu, please enter 0.");
             String idAndPassword = scanner.next();
-            if (idAndPassword.equals("0"))
+            if (idAndPassword.equals("0")) {
                 return false;
+            }
             ResultSet resultSet = null;
             try {
                 String[] idAndPasswordSplit = idAndPassword.split(",");
@@ -30,9 +31,9 @@ public class CustomerLogin {
                 customerId = id;
                 Statement statement = connection.createStatement();
                 resultSet = statement.executeQuery(String.format("SELECT * FROM CUSTOMER WHERE CUSTOMERID='%s' AND PASSWORD='%s'", id, password));
-                if (!resultSet.next())
+                if (!resultSet.next()) {
                     System.out.println("Wrong customer id or password entered! Please try again.");
-                else {
+                } else {
                     System.out.println("\nLogin success! Welcome~");
                     break;
                 }
@@ -116,9 +117,9 @@ public class CustomerLogin {
         System.out.println("To return to the customer login menu, please enter 0.");
         while (true) {
             String loyaltyProgramId = scanner.next().trim();
-            if (loyaltyProgramId.equals("0"))
+            if (loyaltyProgramId.equals("0")) {
                 return;
-
+            }
             if (!loyaltyProgramIds.contains(loyaltyProgramId)) {
                 System.out.println("Wrong program id entered! Please try again.");
                 continue;
@@ -165,9 +166,11 @@ public class CustomerLogin {
         List<String> LOYALTY_PROGRAM_IDs = new ArrayList<>();
         try {
             ResultSet resultSet = connection.createStatement().executeQuery(sql);
-            System.out.println("LOYALTY_PROGRAM_ID");
+            System.out.println("Loyalty_Program_ID\tLoyalty_Program_Name\tBrand_Name");
             while (resultSet.next()) {
-                System.out.println(resultSet.getString(1));
+                String loyaltyProgramName = getLoyaltyProgramName(connection, resultSet.getString(1));
+                String brandName = getBrandName(connection, resultSet.getString(1));
+                System.out.println(resultSet.getString(1) + "\t" + loyaltyProgramName + "\t" + brandName);
                 LOYALTY_PROGRAM_IDs.add(resultSet.getString(1));
             }
         } catch (SQLException e) {
@@ -200,9 +203,10 @@ public class CustomerLogin {
         List<String> activityIds = new ArrayList<>();
         try {
             ResultSet resultSet = connection.createStatement().executeQuery(sql2);
+            System.out.println("Activity_ID\tActivity_Name");
             while (resultSet.next()) {
                 activityIds.add(resultSet.getString(1));
-                System.out.println(resultSet.getString(1));
+                System.out.println(resultSet.getString(1) + "\t" + resultSet.getString(2));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -238,6 +242,31 @@ public class CustomerLogin {
         }
     }
 
+    public static String getLoyaltyProgramName(Connection connection, String loyaltyProgramId) throws SQLException {
+        String sql = String.format("select LOYALTY_PROGRAM_NAME from REGULARLOYALTYPROGRAM where LOYALTY_PROGRAM_ID = '%s'", loyaltyProgramId);
+        String loyaltyProgramName = null;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            resultSet.next();
+            loyaltyProgramName = resultSet.getString(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return loyaltyProgramName;
+    }
+
+    public static String getBrandName(Connection connection, String loyaltyProgramId) throws SQLException {
+        String sql = String.format("select B.Name from BRAND B, REGULARLOYALTYPROGRAM R where B.BRANDID = R.BRANDID and R.LOYALTY_PROGRAM_ID = '%s'", loyaltyProgramId);
+        String brandName = null;
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            resultSet.next();
+            brandName = resultSet.getString(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return brandName;
+    }
 
     public static void purchase(Connection connection) throws SQLException {
         Scanner scanner = new Scanner(System.in);
@@ -255,8 +284,8 @@ public class CustomerLogin {
 
         int giftCardAmount = getGiftCardAmount(connection);
         int toBeUsedGCCount = 0;
-        if (giftCardAmount > 0) {
-            System.out.println("You have " + giftCardAmount + " gift cards" + "in your wallet.Do you want to use it ? ");
+        if (giftCardAmount > 0 && amount >= 100) {
+            System.out.println("You have " + giftCardAmount + " gift cards " + "in your wallet.Do you want to use it? ");
             System.out.println("If you want to use, please enter the number of gift cards you want to use");
             System.out.println("One gift card is worth $100");
             System.out.println("If you don't want to use, please enter 0");
@@ -557,11 +586,11 @@ public class CustomerLogin {
         }
 
         String sql4 = String.format("select TOTALPOINTS from WALLET where CUSTOMERID = '%s' and LOYALTY_PROGRAM_ID = '%s'", customerId, loyaltyProgramId);
-        int totalPoints = 0;
+        double totalPoints = 0;
         try {
             ResultSet resultSet = connection.createStatement().executeQuery(sql4);
             resultSet.next();
-            totalPoints = resultSet.getInt(1);
+            totalPoints = resultSet.getDouble(1);
         } catch (SQLException e) {
             e.printStackTrace();
         }
