@@ -30,18 +30,18 @@ values ('Brand03', 123456, 'Brand Z', '20 Roszel Rd Princeton, NJ', to_date('05/
 insert into REGULARLOYALTYPROGRAM(loyalty_program_id, loyalty_program_name, brandid, istiered)
 VALUES ('TLP01', 'SportGoods', 'Brand01', 1);
 insert into TIEREDPROGRAM(loyalty_program_id, levelnumber, pointsrequired, levelname, multiplier)
-VALUES ('TLP01', 1, 170, 'Bronze', 2);
+VALUES ('TLP01', 1, 0, 'Bronze', 1);
 insert into TIEREDPROGRAM(loyalty_program_id, levelnumber, pointsrequired, levelname, multiplier)
-VALUES ('TLP01', 2, 270, 'Silver', 3);
+VALUES ('TLP01', 2, 170, 'Silver', 2);
 insert into TIEREDPROGRAM(loyalty_program_id, levelnumber, pointsrequired, levelname, multiplier)
-VALUES ('TLP01', 3, 450, 'Gold', 4);
+VALUES ('TLP01', 3, 270, 'Gold', 3);
 
 insert into REGULARLOYALTYPROGRAM(loyalty_program_id, loyalty_program_name, brandid, istiered)
 VALUES ('TLP02', 'MegaCenter', 'Brand02', 1);
 insert into TIEREDPROGRAM(loyalty_program_id, levelnumber, pointsrequired, levelname, multiplier)
-VALUES ('TLP02', 1, 210, 'Special', 2);
+VALUES ('TLP02', 1, 0, 'Special', 1);
 insert into TIEREDPROGRAM(loyalty_program_id, levelnumber, pointsrequired, levelname, multiplier)
-VALUES ('TLP02', 2, 500, 'Premium', 3);
+VALUES ('TLP02', 2, 210, 'Premium', 2);
 
 insert into REGULARLOYALTYPROGRAM(loyalty_program_id, loyalty_program_name, brandid, istiered)
 VALUES ('RLP01', 'TechSups', 'Brand03', 0);
