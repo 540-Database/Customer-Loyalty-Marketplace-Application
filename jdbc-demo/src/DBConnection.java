@@ -1,5 +1,7 @@
 import java.sql.*;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 public class DBConnection {
     static final String jdbcURL = "jdbc:oracle:thin:@ora.csc.ncsu.edu:1521:orcl01";
@@ -68,6 +70,11 @@ public class DBConnection {
 //        if(new Scanner(System.in).nextInt() == 2){
 //            InitiateProcess.init(connection);
 //        }
+
+        System.out.println(-0 < 0);
+        String s = Integer.toString(-0, 2);
+        System.out.println(s);
+
         Scanner scanner = new Scanner(System.in);
         int choice;
         System.out.println("\nWelcome to the Customer Loyalty Marketplace Application!");

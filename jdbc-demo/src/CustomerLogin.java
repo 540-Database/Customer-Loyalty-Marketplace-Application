@@ -276,9 +276,14 @@ public class CustomerLogin {
             System.out.println("Please enter the amount of purchase");
             try {
                 amount = scanner.nextDouble();
+                if (amount < 0) {
+                    System.out.println("Please enter a valid amount");
+                    continue;
+                }
                 break;
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please try again.");
+                scanner.next();
             }
         }
 
