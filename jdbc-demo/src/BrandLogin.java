@@ -75,9 +75,18 @@ public class BrandLogin {
         } while (choice != 7);
     }
 
-    public static void addLoyaltyProgram(Connection connection) {
+    public static void addLoyaltyProgram(Connection connection) throws SQLException{
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
+
+////        Detect whether this brand have a Loyalty Program or not.
+//        Statement statement = connection.createStatement();
+//        ResultSet resultSet = statement.executeQuery(String.format("select * from REGULARLOYALTYPROGRAM where BrandID = ('%s')", BrandID));
+//        if (resultSet.next()) {
+//            System.out.println("This Brand is already having a Loyalty Program, you can update it.");
+//            return;
+//        }
+
 
         int choice = 0;
         do {
@@ -150,6 +159,108 @@ public class BrandLogin {
                     break;
             }
         } while (choice != 3);
+    }
+
+    public static void addTierProgram(Connection connection) throws SQLException{
+        Scanner scanner = new Scanner(System.in);
+        scanner.useDelimiter("\n");
+
+        while (true) {
+            System.out.println("Please enter your Loyalty Program ID & Name, split with comma:");
+            System.out.println("To return to the Brand: LoyaltyProgram page, please enter 0.");
+            String IDAndName = scanner.next();
+            if (IDAndName.equals("0"))
+                return;
+            ResultSet resultSet = null;
+            try {
+                String[] nameAndPasswordSplit = IDAndName.split(",");
+                ProgramID = nameAndPasswordSplit[0].trim();
+                String name = nameAndPasswordSplit[1].trim();
+                Statement statement = connection.createStatement();
+                resultSet = statement.executeQuery(String.format("INSERT INTO REGULARLOYALTYPROGRAM VALUES ('%s', '%s', '%s', 1)", ProgramID, name, BrandID));
+                System.out.println("Create new Tiered Program Successfully!");
+                break;
+            } catch (SQLException e) {
+                System.out.println("The Program ID is already exists.");
+//                e.printStackTrace();
+            }
+        }
+
+        int choice = 0;
+        do {
+            System.out.println("---------- Brand: Tier page ----------");
+            System.out.println("Please enter your option: ");
+            System.out.println("1. Tiers Set up\n2. Activity Types\n3. Reward Types\n4. Go Back");
+
+            choice = scanner.nextInt();
+            switch (choice) {
+                case 1:
+                    tiersSetUp(connection);
+                    break;
+                case 2:
+                    activityTypes(connection);
+                    break;
+                case 3:
+                    rewardTypes(connection);
+                    break;
+                case 4:
+                    break;
+                default:
+                    System.out.println("Invaild option entered. Please try again.");
+                    break;
+            }
+        } while (choice != 0);
+    }
+
+    public static void tiersSetUp(Connection connection) throws SQLException{
+        Scanner scanner = new Scanner(System.in);
+        scanner.useDelimiter("\n");
+
+        int choice = 0;
+        do {
+            System.out.println("---------- Brand: Tiers Set up page ----------");
+            System.out.println("Please enter your option: ");
+            System.out.println("1. Set up\n2. Go Back");
+
+            choice = scanner.nextInt();
+            switch (choice) {
+                case 1:
+                    Statement statement = connection.createStatement();
+                    System.out.println("Please enter the Number of tiers (max 3)");
+                    int numTiers = scanner.nextInt();
+                    while (numTiers != 1 && numTiers != 2 && numTiers != 3) {
+                        System.out.println("Number of tiers should be in range 1 to 3. Please enter a new one.");
+                        numTiers = scanner.nextInt();
+                    }
+
+                    int preTierPoints = 0;
+                    for (int i = 1; i <= numTiers; ++i) {
+                        System.out.println("Please enter the name of Tier " + i);
+                        String tierName = scanner.next();
+                        System.out.println("Please enter the points required of Tier " + i);
+                        int tierPoints = scanner.nextInt();
+                        while (tierPoints <= preTierPoints) {
+                            System.out.println("The points required you entered should be strictly larger than the previous tier, please enter a new one");
+                            tierPoints = scanner.nextInt();
+                        }
+                        System.out.println("Please enter the multiplier of Tier " + i);
+                        double tierMultiplier = scanner.nextDouble();
+                        while (tierMultiplier <= 0) {
+                            System.out.println("The multiplier should be strictly larger than 0, please enter a new one");
+                            tierMultiplier = scanner.nextDouble();
+                        }
+                        ResultSet resultSet = statement.executeQuery(String.format("INSERT INTO TIEREDPROGRAM VALUES ('%s', '%s', '%s', '%s', '%s')", ProgramID, i, tierPoints, tierName, tierMultiplier));
+                        System.out.println("Tier " + i + "set up successfully!");
+                        preTierPoints = tierPoints;
+                    }
+                    break;
+                case 2:
+                    break;
+                default:
+                    System.out.println("Invaild option entered. Please try again.");
+                    break;
+            }
+        } while (choice != 0);
     }
 
     public static void activityTypes(Connection connection) {
@@ -229,33 +340,7 @@ public class BrandLogin {
         } while (choice != 4);
     }
 
-    public static void addTierProgram(Connection connection) {
-        Scanner scanner = new Scanner(System.in);
-        scanner.useDelimiter("\n");
 
-        int choice = 0;
-        do {
-            System.out.println("---------- Brand: Tier page ----------");
-            System.out.println("Please enter your option: ");
-            System.out.println("1.Tiers Set up\n2. Activity Types\n3. Reward Types\n4. Go Back");
 
-            choice = scanner.nextInt();
-            switch (choice) {
-                case 1:
-//                    tiersSetUp(connection);
-                    break;
-                case 2:
-//                    activityTypes(connection);
-                    break;
-                case 3:
-//                    rewardTypes(connection);
-                    break;
-                case 4:
-                    break;
-                default:
-                    System.out.println("Invaild option entered. Please try again.");
-                    break;
-            }
-        } while (choice != 0);
-    }
+
 }
