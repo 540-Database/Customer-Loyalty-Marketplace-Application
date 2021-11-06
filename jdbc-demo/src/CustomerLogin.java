@@ -54,7 +54,7 @@ public class CustomerLogin {
         do {
             System.out.println("\n---------- Customer Main Page ----------");
             System.out.println("Please enter your option: ");
-            System.out.println("0. Exit\n1. Enroll in a Loyalty Program\n2. Reward Activities\n3. View Wallet\n" +
+            System.out.println("1. Enroll in a Loyalty Program\n2. Reward Activities\n3. View Wallet\n" +
                     "4. Redeem Points\n5. Log out\n");
 
             choice = scanner.nextInt();
@@ -68,6 +68,7 @@ public class CustomerLogin {
                 case 3:
                     break;
                 case 4:
+                    redeem(connection);
                     break;
                 case 5:
                     break;
@@ -232,7 +233,6 @@ public class CustomerLogin {
         }
     }
 
-
     public static void purchase(Connection connection) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
@@ -322,5 +322,8 @@ public class CustomerLogin {
         return version;
     }
 
+    public static void redeem(Connection connection){
+
+    }
 
 }
