@@ -66,6 +66,7 @@ public class CustomerLogin {
                     rewardActivities(connection);
                     break;
                 case 3:
+                    viewWallet(connection);
                     break;
                 case 4:
                     break;
@@ -520,5 +521,49 @@ public class CustomerLogin {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void viewWallet(Connection connection) {
+        System.out.println("\n---------- View Wallet ----------");
+        String sql1 = String.format("select * from WALLET where CUSTOMERID = '%s'", customerId);
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql1);
+            while(resultSet.next()){
+                String loyaltyProgramID = resultSet.getString(3);
+                String brandID = resultSet.getString(4);
+                String availablePoint = resultSet.getString(5);
+                String totalPoint = resultSet.getString(6);
+                String levelNum = resultSet.getString(7);
+                if (levelNum.equals("0")){
+                    String regularLog = String.format("For your enrolled regular loyalty program " +
+                            "%s" + " under %s, " + " you currently have earned %s total points" +
+                            " and %s points available for redemption!", loyaltyProgramID, brandID, totalPoint, availablePoint);
+                    System.out.println(regularLog);
+                } else {
+                    String sql2 = String.format("select LEVELNAME from TIEREDPROGRAM where LOYALTY_PROGRAM_ID = '%s' AND LEVELNUMBER = %s", loyaltyProgramID, levelNum);
+                    ResultSet  tierResult = connection.createStatement().executeQuery(sql2);
+                    tierResult.next();
+                    String tierStatus = tierResult.getString(1);
+                    String tierLog = String.format("For your enrolled tired loyalty program " +
+                            "%s" + " under %s, " + "you are %s tired status!" + " You currently have earned %s total points" +
+                            " and %s points available for redemption!", loyaltyProgramID, brandID, tierStatus, totalPoint, availablePoint);
+                    System.out.println(tierLog);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        Scanner scanner = new Scanner(System.in);
+        int choice;
+        do {
+            System.out.println("\n");
+            System.out.println("Please enter your option: ");
+            System.out.println("1. Exit\n");
+            choice = scanner.nextInt();
+            switch (choice) {
+                case 1:
+                    break;
+            }
+        } while (choice != 1);
     }
 }
