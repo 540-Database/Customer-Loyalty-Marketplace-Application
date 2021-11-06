@@ -16,7 +16,7 @@ public class CustomerLogin {
     static String activityId;
     static String brandId;
 
-    public static void verifyLogin(Connection connection) {
+    public static boolean verifyLogin(Connection connection) {
         customerId = null;
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
@@ -25,7 +25,7 @@ public class CustomerLogin {
             System.out.println("To return to the root menu, please enter 0.");
             String idAndPassword = scanner.next();
             if (idAndPassword.equals("0"))
-                return;
+                return false;
             ResultSet resultSet = null;
             try {
                 String[] idAndPasswordSplit = idAndPassword.split(",");
@@ -44,17 +44,20 @@ public class CustomerLogin {
                 e.printStackTrace();
             }
         }
+        return true;
     }
 
     public static void run(Connection connection) throws SQLException {
-        verifyLogin(connection);
+        if (!verifyLogin(connection)){
+            return;
+        }
         Scanner scanner = new Scanner(System.in);
 
         int choice;
         do {
             System.out.println("\n---------- Customer Main Page ----------");
             System.out.println("Please enter your option: ");
-            System.out.println("0. Exit\n1. Enroll in a Loyalty Program\n2. Reward Activities\n3. View Wallet\n" +
+            System.out.println("1. Enroll in a Loyalty Program\n2. Reward Activities\n3. View Wallet\n" +
                     "4. Redeem Points\n5. Log out\n");
 
             choice = scanner.nextInt();
