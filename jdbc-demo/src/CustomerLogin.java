@@ -302,6 +302,7 @@ public class CustomerLogin {
                 }
             }
 
+            // checking all reward options of the program
             statement = connection.createStatement();
             ResultSet rewardSections = statement.executeQuery(String.format(
                     "SELECT rd.REWARDNAME, rrr.POINTS FROM RRRULES rrr, REWARD rd WHERE rrr.STATUS = 1 AND rrr.LOYALTY_PROGRAM_ID = '%s' AND rrr.REWARDID = rd.REWARDID", loyaltyProgramIdSelected));
