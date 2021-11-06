@@ -6,17 +6,17 @@ public class BrandLogin {
     boolean isValidated = false;
     static String ProgramID;
 
-    public static void verifyLogin(Connection connection){
+    public static void verifyLogin(Connection connection) {
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
-        while (true){
+        while (true) {
             System.out.println("Please enter brand's ID and password, split with comma:");
             System.out.println("To return to the root menu, please enter 0.");
             String IDAndPassword = scanner.next();
             if (IDAndPassword.equals("0"))
                 return;
             ResultSet resultSet = null;
-            try{
+            try {
                 String[] IDAndPasswordSplit = IDAndPassword.split(",");
                 BrandID = IDAndPasswordSplit[0].trim();
                 String password = IDAndPasswordSplit[1].trim();
@@ -24,11 +24,11 @@ public class BrandLogin {
                 resultSet = statement.executeQuery(String.format("SELECT * FROM BRAND WHERE BrandID='%s' AND PASSWORD='%s'", BrandID, password));
                 if (!resultSet.next())
                     System.out.println("Wrong brand's ID or password entered! Please try again.");
-                else{
+                else {
                     System.out.println("Login success! Welcome~");
                     break;
                 }
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -75,7 +75,7 @@ public class BrandLogin {
         } while (choice != 7);
     }
 
-    public static void addLoyaltyProgram(Connection connection) throws SQLException{
+    public static void addLoyaltyProgram(Connection connection) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
 
@@ -151,6 +151,7 @@ public class BrandLogin {
                     break;
                 case 2:
                     rewardTypes(connection);
+
                     break;
                 case 3:
                     break;
@@ -161,7 +162,7 @@ public class BrandLogin {
         } while (choice != 3);
     }
 
-    public static void addTierProgram(Connection connection) throws SQLException{
+    public static void addTierProgram(Connection connection) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
 
@@ -204,15 +205,25 @@ public class BrandLogin {
                     rewardTypes(connection);
                     break;
                 case 4:
-                    break;
+                    return;
                 default:
                     System.out.println("Invaild option entered. Please try again.");
                     break;
             }
-        } while (choice != 0);
+        } while (choice != 4);
     }
 
-    public static void tiersSetUp(Connection connection) throws SQLException{
+    public static void tiersSetUp(Connection connection) throws SQLException {
+        String sql = String.format("select * from TIEREDPROGRAM where Loyalty_Program_ID = '%s'", ProgramID);
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            if (resultSet.next()) {
+                System.out.println("You already have set up your tiers");
+                return;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
 
@@ -253,9 +264,9 @@ public class BrandLogin {
                         System.out.println("Tier " + i + "set up successfully!");
                         preTierPoints = tierPoints;
                     }
-                    break;
+                    return;
                 case 2:
-                    break;
+                    return;
                 default:
                     System.out.println("Invaild option entered. Please try again.");
                     break;
@@ -273,7 +284,7 @@ public class BrandLogin {
             System.out.println("---------- Brand: Activity Types ----------");
             System.out.println("Please enter your option: ");
             System.out.println("1. Purchase\n2. Leave a review\n3. Refer a friend\n4. Go Back");
-            try{
+            try {
                 choice = scanner.nextInt();
                 Statement statement = connection.createStatement();
                 switch (choice) {
@@ -312,7 +323,7 @@ public class BrandLogin {
             System.out.println("---------- Brand: Activity Types ----------");
             System.out.println("Please enter your option: ");
             System.out.println("1. Gift Card\n2. Free Product\n3. Go Back");
-            try{
+            try {
                 choice = scanner.nextInt();
                 Statement statement = connection.createStatement();
                 switch (choice) {
@@ -325,11 +336,11 @@ public class BrandLogin {
                     case 2:
                         System.out.println("Please enter the quantity of the reward Free Product");
                         quantity = scanner.nextInt();
-                        resultSet = statement.executeQuery(String.format("INSERT INTO LOYALTY_PROGRAM_HAS_REWARD VALUES ('%s', 'R02')", ProgramID));
+                        resultSet = statement.executeQuery(String.format("INSERT INTO LOYALTY_PROGRAM_HAS_REWARD VALUES ('%s', 'R02', '%s')", ProgramID, quantity));
                         System.out.println("The reward Free Product is added to your program " + ProgramID);
                         break;
                     case 3:
-                        break;
+                        return;
                     default:
                         System.out.println("Invaild option entered. Please try again.");
                         break;
@@ -337,10 +348,6 @@ public class BrandLogin {
             } catch (Exception e) {
                 System.out.println("The reward you chose is already in your program, you can choose another one.");
             }
-        } while (choice != 4);
+        } while (choice != 3);
     }
-
-
-
-
 }
