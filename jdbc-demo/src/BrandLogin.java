@@ -80,12 +80,12 @@ public class BrandLogin {
         scanner.useDelimiter("\n");
 
 ////        Detect whether this brand have a Loyalty Program or not.
-//        Statement statement = connection.createStatement();
-//        ResultSet resultSet = statement.executeQuery(String.format("select * from REGULARLOYALTYPROGRAM where BrandID = ('%s')", BrandID));
-//        if (resultSet.next()) {
-//            System.out.println("This Brand is already having a Loyalty Program, you can update it.");
-//            return;
-//        }
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(String.format("select * from REGULARLOYALTYPROGRAM where BrandID = ('%s')", BrandID));
+        if (resultSet.next()) {
+            System.out.println("This Brand is already having a Loyalty Program, you can update it.");
+            return;
+        }
 
 
         int choice = 0;
