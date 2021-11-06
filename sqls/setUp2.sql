@@ -119,9 +119,9 @@ VALUES ('C0005', 123456, 'Tony Stark', '8731596464', '10880 Malibu Point, CA', '
 -- Join
 -- C0001
 insert into WALLET(walletid, customerid, loyalty_program_id, brandid, points, totalpoints, levelnumber)
-VALUES ('W0001', 'C0001', 'TLP01', 'Brand01', 0, 0, 0);
+VALUES ('W0001', 'C0001', 'TLP01', 'Brand01', 0, 0, 1);
 insert into WALLET(walletid, customerid, loyalty_program_id, brandid, points, totalpoints, levelnumber)
-VALUES ('W0001', 'C0001', 'TLP02', 'Brand02', 0, 0, 0);
+VALUES ('W0001', 'C0001', 'TLP02', 'Brand02', 0, 0, 1);
 
 insert into CUSTOMERACTIVITIES(CUSTOMERACTIVITYID, customerid, brandid, activityid, pointsearned, activitydate)
 VALUES (1, 'C0001', 'Brand01', 'A00', 0, to_date('6/10/2021', 'mm/dd/yyyy'));
@@ -131,14 +131,14 @@ VALUES (2, 'C0001', 'Brand02', 'A00', 0, to_date('8/9/2021', 'mm/dd/yyyy'));
 -- Join
 -- C0002
 insert into WALLET(walletid, customerid, loyalty_program_id, brandid, points, totalpoints, levelnumber)
-VALUES ('W0002', 'C0002', 'TLP01', 'Brand01', 0, 0, 0);
+VALUES ('W0002', 'C0002', 'TLP01', 'Brand01', 0, 0, 1);
 insert into CUSTOMERACTIVITIES(CUSTOMERACTIVITYID, customerid, brandid, activityid, pointsearned, activitydate)
 VALUES (3, 'C0002', 'Brand01', 'A00', 0, to_date('7/2/2021', 'mm/dd/yyyy'));
 
 -- Join
 -- C0003
 insert into WALLET(walletid, customerid, loyalty_program_id, brandid, points, totalpoints, levelnumber)
-VALUES ('W0003', 'C0003', 'TLP02', 'Brand02', 0, 0, 0);
+VALUES ('W0003', 'C0003', 'TLP02', 'Brand02', 0, 0, 1);
 insert into CUSTOMERACTIVITIES(CUSTOMERACTIVITYID, customerid, brandid, activityid, pointsearned, activitydate)
 VALUES (4, 'C0003', 'Brand02', 'A00', 0, to_date('8/1/2021', 'mm/dd/yyyy'));
 
@@ -150,12 +150,12 @@ VALUES (5, 'C0003', 'Brand03', 'A00', 0, to_date('7/30/2021', 'mm/dd/yyyy'));
 -- Join
 -- C0005
 insert into WALLET(walletid, customerid, loyalty_program_id, brandid, points, totalpoints, levelnumber)
-VALUES ('W0005', 'C0005', 'TLP01', 'Brand01', 0, 0, 0);
+VALUES ('W0005', 'C0005', 'TLP01', 'Brand01', 0, 0, 1);
 insert into CUSTOMERACTIVITIES(CUSTOMERACTIVITYID, customerid, brandid, activityid, pointsearned, activitydate)
 VALUES (6, 'C0005', 'Brand01', 'A00', 0, to_date('8/10/2021', 'mm/dd/yyyy'));
 
 insert into WALLET(walletid, customerid, loyalty_program_id, brandid, points, totalpoints, levelnumber)
-VALUES ('W0005', 'C0005', 'TLP02', 'Brand02', 0, 0, 0);
+VALUES ('W0005', 'C0005', 'TLP02', 'Brand02', 0, 0, 1);
 insert into CUSTOMERACTIVITIES(CUSTOMERACTIVITYID, customerid, brandid, activityid, pointsearned, activitydate)
 VALUES (7, 'C0005', 'Brand02', 'A00', 0, to_date('10/10/2021', 'mm/dd/yyyy'));
 
@@ -222,7 +222,8 @@ insert into CUSTOMERACTIVITIES(CUSTOMERACTIVITYID, customerid, brandid, activity
 VALUES (14, 'C0001', 'Brand02', 'A03', 60, to_date('10/18/2021', 'mm/dd/yyyy'));
 update WALLET
 set POINTS=POINTS + 90,
-    TOTALPOINTS=TOTALPOINTS + 90
+    TOTALPOINTS=TOTALPOINTS + 90,
+    LEVELNUMBER = 2
 where WALLETID = 'W0001'
   and BRANDID = 'Brand02';
 
@@ -344,7 +345,8 @@ values (28, 'C0005', 'Brand01', 'C0005 Review at Brand01', to_date('10/15/2021',
 
 update WALLET
 set POINTS     = POINTS + 80,
-    TOTALPOINTS=TOTALPOINTS + 80
+    TOTALPOINTS=TOTALPOINTS + 80,
+    LEVELNUMBER=2
 where WALLETID = 'W0005'
   and BRANDID = 'Brand01';
 
