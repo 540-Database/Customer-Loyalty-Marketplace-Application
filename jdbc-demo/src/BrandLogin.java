@@ -418,7 +418,7 @@ public class BrandLogin {
                         }
                         break;
                     case 2:
-                        break;
+                        return;
                     default:
                         System.out.println("Invaild option entered. Please try again.");
                         break;
@@ -443,7 +443,7 @@ public class BrandLogin {
 
         int choice = 0;
         do {
-            System.out.println("---------- Brand: addRERules Types ----------");
+            System.out.println("---------- Brand: addRRRules Types ----------");
             System.out.println("Please enter your option: ");
             System.out.println("1. addRRRule\n2. Go Back");
             try {
@@ -493,7 +493,7 @@ public class BrandLogin {
                         }
                         break;
                     case 2:
-                        break;
+                        return;
                     default:
                         System.out.println("Invaild option entered. Please try again.");
                         break;
