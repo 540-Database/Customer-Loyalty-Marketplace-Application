@@ -208,15 +208,25 @@ public class BrandLogin {
                     rewardTypes(connection);
                     break;
                 case 4:
-                    break;
+                    return;
                 default:
                     System.out.println("Invaild option entered. Please try again.");
                     break;
             }
-        } while (choice != 0);
+        } while (choice != 4);
     }
 
     public static void tiersSetUp(Connection connection) throws SQLException {
+        String sql = String.format("select * from TIEREDPROGRAM where Loyalty_Program_ID = '%s'", ProgramID);
+        try {
+            ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            if (resultSet.next()) {
+                System.out.println("You already have set up your tiers");
+                return;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
 
@@ -329,11 +339,11 @@ public class BrandLogin {
                     case 2:
                         System.out.println("Please enter the quantity of the reward Free Product");
                         quantity = scanner.nextInt();
-                        resultSet = statement.executeQuery(String.format("INSERT INTO LOYALTY_PROGRAM_HAS_REWARD VALUES ('%s', 'R02')", ProgramID));
+                        resultSet = statement.executeQuery(String.format("INSERT INTO LOYALTY_PROGRAM_HAS_REWARD VALUES ('%s', 'R02', '%s')", ProgramID, quantity));
                         System.out.println("The reward Free Product is added to your program " + ProgramID);
                         break;
                     case 3:
-                        break;
+                        return;
                     default:
                         System.out.println("Invaild option entered. Please try again.");
                         break;
@@ -341,7 +351,7 @@ public class BrandLogin {
             } catch (Exception e) {
                 System.out.println("The reward you chose is already in your program, you can choose another one.");
             }
-        } while (choice != 4);
+        } while (choice != 3);
     }
 
     public static void addRERules(Connection connection) throws SQLException {
