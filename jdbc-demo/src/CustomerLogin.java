@@ -253,7 +253,8 @@ public class CustomerLogin {
                 case 1:
                     int result = redeemActivities(connection);
                     if (result == -1) return;
-                    if (result == -5){
+                    if (result == 1) return;
+                    if (result == 5){
                         System.out.println("----- Unknow error -----");
                     }
                     break;
@@ -410,7 +411,8 @@ public class CustomerLogin {
                             "INSERT INTO WALLETREWARDS (CUSTOMERID, BRANDID, REWARDID, QUANTITY) VALUES ('%s', '%s', '%s', %d)", customerId, brandId, rewardId, quantityCustomerHave));
                 }
                 System.out.println("你到达了Limbo。");
-                break;
+                System.out.println("Redirecting to the customer login menu.");
+                return 1;
             }
 
         } catch (SQLException e){
