@@ -80,6 +80,7 @@ public class CustomerLogin {
     }
 
     public static void enrollLoyaltyPrograms(Connection connection) throws SQLException {
+        loyaltyProgramId = null;
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
         List<String> loyaltyProgramIds = new ArrayList<>();
@@ -96,7 +97,7 @@ public class CustomerLogin {
             } else {
                 System.out.println("---------- Displaying All Validate Loyalty Programs ----------");
                 System.out.println(String.format("%12s %15s %10s ", "Program id", "Program name", "Brand id"));
-                String loyaltyProgramId = loyaltyPrograms.getString(1);
+                loyaltyProgramId = loyaltyPrograms.getString(1);
                 String loyaltyProgramName = loyaltyPrograms.getString(2);
                 String loyaltyProgramBrandId = loyaltyPrograms.getString(3);
                 System.out.println(String.format("%12s %15s %10s", loyaltyProgramId, loyaltyProgramName, loyaltyProgramBrandId));
@@ -116,7 +117,7 @@ public class CustomerLogin {
         System.out.println("Please enter the program id of the program you want to enroll in.");
         System.out.println("To return to the customer login menu, please enter 0.");
         while (true) {
-            String loyaltyProgramId = scanner.next().trim();
+            loyaltyProgramId = scanner.next().trim();
             if (loyaltyProgramId.equals("0")) {
                 return;
             }
@@ -142,6 +143,7 @@ public class CustomerLogin {
                 String brandId = resultBrandId.getString(1);
                 statement.executeQuery(String.format("INSERT INTO WALLET (walletid, customerid, loyalty_program_id, brandid, points, totalpoints, levelnumber) " +
                         "VALUES ('%s', '%s', '%s', '%s', 0, 0, 0)", walletId, customerId, loyaltyProgramId, brandId));
+                updateTier(connection);
                 int customerActivityId = getMaxIDFromCustomerActivities(connection);
                 String now = Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
                 statement.executeQuery(String.format("INSERT INTO CUSTOMERACTIVITIES (CUSTOMERACTIVITYID, customerid, brandid, activityid, pointsearned, activitydate) " +

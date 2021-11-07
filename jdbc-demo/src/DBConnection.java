@@ -1,5 +1,6 @@
 import java.sql.*;
 import java.util.Scanner;
+
 public class DBConnection {
     static final String jdbcURL = "jdbc:oracle:thin:@ora.csc.ncsu.edu:1521:orcl01";
     static Connection connection = null;
