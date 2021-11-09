@@ -554,7 +554,7 @@ public class BrandLogin {
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
 
-        ResultSet resultSet = connection.createStatement().executeQuery(String.format("select RRCODE from RRRULES where BrandID = ('%s') and Status = 1", BrandID));
+        ResultSet resultSet = connection.createStatement().executeQuery(String.format("select RRCODE from RRRULES where LOYALTY_PROGRAM_ID = ('%s') and Status = 1", ProgramID));
 
         Set<String> RRRULES = new HashSet<>();
         String Rules = "";
@@ -612,7 +612,7 @@ public class BrandLogin {
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
 
-        ResultSet resultSet = connection.createStatement().executeQuery(String.format("select RECODE from RERULES where BrandID = ('%s') and Status = 1", BrandID));
+        ResultSet resultSet = connection.createStatement().executeQuery(String.format("select RECODE from RERULES where LOYALTY_PROGRAM_ID = ('%s') and Status = 1", ProgramID));
 
         Set<String> ReRules = new HashSet<>();
         String Rules = "";
