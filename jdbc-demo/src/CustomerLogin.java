@@ -276,8 +276,8 @@ public class CustomerLogin {
         // Checking all loyalty programs the customer enrolled in
         try{
             Statement statement = connection.createStatement();
-            ResultSet loyaltyProgramHasEnrolled = statement.executeQuery(String.format("SELECT LOYALTY_PROGRAM_ID, BRANDID, POINTS FROM WALLET " +
-                    "WHERE CUSTOMERID = '%s'", customerId));
+            ResultSet loyaltyProgramHasEnrolled = statement.executeQuery(String.format("SELECT LOYALTY_PROGRAM_ID, " +
+                    "BRANDID, POINTS FROM WALLET WHERE CUSTOMERID = '%s'", customerId));
 
             if (!loyaltyProgramHasEnrolled.isBeforeFirst()){
                 System.out.println("You haven't enrolled in any loyalty program yet!");
@@ -327,7 +327,8 @@ public class CustomerLogin {
 
             // checking all reward options of the program
             ResultSet rewardSections = statement.executeQuery(String.format(
-                    "SELECT rd.REWARDNAME, rrr.POINTS FROM RRRULES rrr, REWARD rd WHERE rrr.STATUS = 1 AND rrr.LOYALTY_PROGRAM_ID = '%s' AND rrr.REWARDID = rd.REWARDID", loyaltyProgramIdSelected));
+                    "SELECT rd.REWARDNAME, rrr.POINTS FROM RRRULES rrr, REWARD rd WHERE rrr.STATUS = 1 " +
+                            "AND rrr.LOYALTY_PROGRAM_ID = '%s' AND rrr.REWARDID = rd.REWARDID", loyaltyProgramIdSelected));
             if (!rewardSections.isBeforeFirst()){
                 System.out.println("Sorry, this program do not have any reward options yet.");
                 System.out.println("Redirecting to the loyalty program selection page.");
@@ -376,7 +377,9 @@ public class CustomerLogin {
                 int quantity = Integer.MIN_VALUE;
                 String rewardId = "";
                 ResultSet rewardQuantity = statement.executeQuery(
-                        String.format("SELECT lphr.QUANTITY, lphr.REWARDID FROM LOYALTY_PROGRAM_HAS_REWARD lphr, REWARD rd WHERE lphr.LOYALTY_PROGRAM_ID = '%s' AND lphr.REWARDID = rd.REWARDID AND rd.REWARDNAME = '%s'", loyaltyProgramIdSelected, redeemItemName));
+                        String.format("SELECT lphr.QUANTITY, lphr.REWARDID FROM LOYALTY_PROGRAM_HAS_REWARD lphr, REWARD rd" +
+                                " WHERE lphr.LOYALTY_PROGRAM_ID = '%s' AND lphr.REWARDID = rd.REWARDID AND rd.REWARDNAME = '%s'",
+                                loyaltyProgramIdSelected, redeemItemName));
                 if (rewardQuantity.next()){
                     quantity = rewardQuantity.getInt(1);
                     rewardId = rewardQuantity.getString(2);
@@ -407,25 +410,31 @@ public class CustomerLogin {
                 }
 
                 statement.executeUpdate(String.format(
-                        "UPDATE LOYALTY_PROGRAM_HAS_REWARD SET QUANTITY = '%s' WHERE LOYALTY_PROGRAM_ID = '%s' AND REWARDID = '%s'", String.valueOf(quantity - 1), loyaltyProgramIdSelected, rewardId));
-                statement.executeUpdate(String.format("INSERT INTO REDEEMRECORD (CUSTOMERID, BRANDID, POINTREDEEMED, RRCODE, VERSIONNUM, REDEEMDATE, REWARDID, QUANTITY) " +
+                        "UPDATE LOYALTY_PROGRAM_HAS_REWARD SET QUANTITY = '%s' WHERE LOYALTY_PROGRAM_ID = '%s' " +
+                                "AND REWARDID = '%s'", String.valueOf(quantity - 1), loyaltyProgramIdSelected, rewardId));
+                statement.executeUpdate(String.format("INSERT INTO REDEEMRECORD " +
+                        "(CUSTOMERID, BRANDID, POINTREDEEMED, RRCODE, VERSIONNUM, REDEEMDATE, REWARDID, QUANTITY) " +
                         "VALUES ('%s', '%s', '%s', '%s', '%s', to_date('%s', 'mm/dd/yyyy'), '%s', %d)",
                         customerId, brandId, pointsNeeded, rrcode, versionNum, now, rewardId, 1));
                 statement.executeUpdate(String.format(
-                        "UPDATE WALLET SET POINTS = %d WHERE CUSTOMERID = '%s' AND LOYALTY_PROGRAM_ID = '%s'", (pointHaveInt - pointsNeededInt), customerId, loyaltyProgramIdSelected));
+                        "UPDATE WALLET SET POINTS = %d WHERE CUSTOMERID = '%s' AND LOYALTY_PROGRAM_ID = '%s'",
+                        (pointHaveInt - pointsNeededInt), customerId, loyaltyProgramIdSelected));
 
                 ResultSet walletRewardRecord = statement.executeQuery(String.format(
-                        "SELECT * FROM WALLETREWARDS WHERE CUSTOMERID = '%s' AND BRANDID = '%s' AND REWARDID = '%s'", customerId, brandId, rewardId
+                        "SELECT * FROM WALLETREWARDS WHERE CUSTOMERID = '%s' AND BRANDID = '%s' AND REWARDID = '%s'",
+                        customerId, brandId, rewardId
                 ));
                 if (!walletRewardRecord.isBeforeFirst()){
                     statement.executeUpdate(String.format(
-                            "INSERT INTO WALLETREWARDS (CUSTOMERID, BRANDID, REWARDID, QUANTITY) VALUES ('%s', '%s', '%s', %d)", customerId, brandId, rewardId, 1));
+                            "INSERT INTO WALLETREWARDS (CUSTOMERID, BRANDID, REWARDID, QUANTITY) " +
+                                    "VALUES ('%s', '%s', '%s', %d)", customerId, brandId, rewardId, 1));
                 }
                 else {
                     walletRewardRecord.next();
                     int quantityCustomerHave = walletRewardRecord.getInt(1);
                     statement.executeUpdate(String.format(
-                            "INSERT INTO WALLETREWARDS (CUSTOMERID, BRANDID, REWARDID, QUANTITY) VALUES ('%s', '%s', '%s', %d)", customerId, brandId, rewardId, quantityCustomerHave));
+                            "INSERT INTO WALLETREWARDS (CUSTOMERID, BRANDID, REWARDID, QUANTITY) " +
+                                    "VALUES ('%s', '%s', '%s', %d)", customerId, brandId, rewardId, quantityCustomerHave));
                 }
 
                 try{
@@ -436,7 +445,7 @@ public class CustomerLogin {
                 } catch (Throwable whatever){
                     System.out.println("Human Error.");
                 }
-                System.out.println("你到达了Limbo。");
+//                System.out.println("你到达了Limbo。");
                 System.out.println("Redirecting to the customer login menu.");
                 return 1;
             }
