@@ -1,3 +1,5 @@
+import com.sun.org.apache.xml.internal.utils.ThreadControllerWrapper;
+
 import java.sql.*;
 import java.util.*;
 import java.time.Instant;
@@ -294,6 +296,13 @@ public class CustomerLogin {
                 System.out.println(String.format("%12s %15s %12s", loyaltyProgramId, loyaltyProgramBrandId, loyaltyProgramPoints));
             }
 
+            try{
+                loyaltyProgramHasEnrolled.close();
+                statement.close();
+            } catch (Throwable whatever){
+                System.out.println("Human Error.");
+            }
+
             System.out.println("Please enter the loyalty program id you want to redeem. Enter 0 if you wish to go back.");
             String loyaltyProgramIdSelected = scanner.next();
             if (loyaltyProgramIdSelected.equals("0"))
@@ -327,6 +336,14 @@ public class CustomerLogin {
             while (rewardSections.next()){
                 rewardNameToPoints.put(rewardSections.getString(1), rewardSections.getString(2));
             }
+
+            try {
+                rewardSections.close();
+                statement.close();
+            } catch (Throwable whatever){
+                System.out.println("Human Error.");
+            }
+
             System.out.println("---------- Displaying all available rewards from the program ----------");
             String pointHave = loyaltyProgramIdsEnrolledToPoints.get(loyaltyProgramIdSelected);
             System.out.println(String.format("You have %s points currently.", pointHave));
@@ -409,6 +426,15 @@ public class CustomerLogin {
                     int quantityCustomerHave = walletRewardRecord.getInt(1);
                     statement.executeUpdate(String.format(
                             "INSERT INTO WALLETREWARDS (CUSTOMERID, BRANDID, REWARDID, QUANTITY) VALUES ('%s', '%s', '%s', %d)", customerId, brandId, rewardId, quantityCustomerHave));
+                }
+
+                try{
+                    walletRewardRecord.close();
+                    rrcodeAndVersionViaProgramIdAndRewardId.close();
+                    rewardQuantity.close();
+                    statement.close();
+                } catch (Throwable whatever){
+                    System.out.println("Human Error.");
                 }
                 System.out.println("你到达了Limbo。");
                 System.out.println("Redirecting to the customer login menu.");
