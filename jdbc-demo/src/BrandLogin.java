@@ -554,6 +554,11 @@ public class BrandLogin {
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
 
+        ResultSet programIDset = connection.createStatement().executeQuery(String.format("select LOYALTY_PROGRAM_ID from REGULARLOYALTYPROGRAM where BrandID = ('%s')", BrandID));
+        programIDset.next();
+        ProgramID = programIDset.getString(1);
+        programIDset.close();
+
         ResultSet resultSet = connection.createStatement().executeQuery(String.format("select RRCODE from RRRULES where LOYALTY_PROGRAM_ID = ('%s') and Status = 1", ProgramID));
 
         Set<String> RRRULES = new HashSet<>();
@@ -573,8 +578,8 @@ public class BrandLogin {
                     ResultSet oldSet = connection.createStatement().executeQuery(String.format("select * from RRRULES where RRCODE = ('%s') and Status = 1", RRCODE));
                     oldSet.next();
                     ProgramID = oldSet.getString(2);
-                    int version = oldSet.getInt(7);
-                    String rewardID = oldSet.getString(4);
+                    int version = oldSet.getInt(6);
+                    String rewardID = oldSet.getString(3);
                     int points;
                     while (true) {
                         System.out.println("Please enter the updated points");
@@ -591,8 +596,8 @@ public class BrandLogin {
                             e.printStackTrace();
                         }
                     }
-                    connection.createStatement().executeQuery(String.format("update RRRULES set Status = 0 where RRCODE = ('%s') and Status = 1", RRCODE));
-                    connection.createStatement().executeQuery(String.format("INSERT INTO RRRULES VALUES ('%s', '%s','%s','%s','%s','%s')", RRCODE, ProgramID, rewardID, points, 1, version + 1));
+                    connection.createStatement().executeUpdate(String.format("update RRRULES set Status = 0 where RRCODE = ('%s') and Status = 1", RRCODE));
+                    connection.createStatement().executeUpdate(String.format("INSERT INTO RRRULES VALUES ('%s', '%s','%s','%s','%s','%s')", RRCODE, ProgramID, rewardID, points, 1, version + 1));
                     oldSet.close();
                     System.out.println("Rules updated successfully!");
                     break;
@@ -612,7 +617,12 @@ public class BrandLogin {
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
 
-        ResultSet resultSet = connection.createStatement().executeQuery(String.format("select RECODE from RERULES where LOYALTY_PROGRAM_ID = ('%s') and Status = 1", ProgramID));
+        Statement statement = connection.createStatement();
+        ResultSet programIDset = statement.executeQuery(String.format("select LOYALTY_PROGRAM_ID from REGULARLOYALTYPROGRAM where BrandID = ('%s')", BrandID));
+        programIDset.next();
+        ProgramID = programIDset.getString(1);
+        programIDset.close();
+        ResultSet resultSet = statement.executeQuery(String.format("select RECODE from RERULES where LOYALTY_PROGRAM_ID = '%s' and Status = 1", ProgramID));
 
         Set<String> ReRules = new HashSet<>();
         String Rules = "";
@@ -630,9 +640,9 @@ public class BrandLogin {
                 try {
                     ResultSet oldSet = connection.createStatement().executeQuery(String.format("select * from RERULES where RECODE = ('%s') and Status = 1", RECODE));
                     oldSet.next();
-                    ProgramID = oldSet.getString(3);
-                    int version = oldSet.getInt(6);
-                    String activityID = oldSet.getString(4);
+                    ProgramID = oldSet.getString(2);
+                    int version = oldSet.getInt(5);
+                    String activityID = oldSet.getString(3);
                     int points;
                     while (true) {
                         System.out.println("Please enter the updated points");
@@ -651,13 +661,14 @@ public class BrandLogin {
                     }
 
 
-                    connection.createStatement().executeQuery(String.format("update RERULES set Status = 0 where RECODE = ('%s') and Status = 1", RECODE));
-                    connection.createStatement().executeQuery(String.format("INSERT INTO RERULES VALUES ('%s', '%s','%s','%s','%s','%s')", RECODE, ProgramID, activityID, points, version + 1, 1));
+                    connection.createStatement().executeUpdate(String.format("update RERULES set Status = 0 where RECODE = ('%s') and Status = 1", RECODE));
+                    connection.createStatement().executeUpdate(String.format("INSERT INTO RERULES (RECODE, LOYALTY_PROGRAM_ID, ACTIVITYID, POINTS, VERSIONNUMBER, STATUS) VALUES ('%s','%s','%s',%d, %d, %d)", RECODE, ProgramID, activityID, points, version + 1, 1));
                     System.out.println("Rules updated successfully!");
                     oldSet.close();
                     break;
                 } catch (Exception e) {
-                    System.out.println("Please enter the RECODE listed below.");
+//                    System.out.println("Please enter the RECODE listed below.");
+                    e.printStackTrace();
                 }
             }
         }
