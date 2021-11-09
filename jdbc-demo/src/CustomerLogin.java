@@ -262,6 +262,7 @@ public class CustomerLogin {
             ResultSet resultSet = connection.createStatement().executeQuery(sql);
             resultSet.next();
             loyaltyProgramName = resultSet.getString(1);
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -275,6 +276,7 @@ public class CustomerLogin {
             ResultSet resultSet = connection.createStatement().executeQuery(sql);
             resultSet.next();
             brandName = resultSet.getString(1);
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -362,6 +364,7 @@ public class CustomerLogin {
             String sql4 = String.format("insert into PURCHASERECORD(customeractivityid, customerid, brandid, moneyspent, pointsearned, giftcardused, totalamount, purchasedate, recode, versionnumber)" +
                     " VALUES (%d, '%s', '%s',  %f, %f, %d, %f, to_date('%s', 'mm/dd/yyyy'), '%s', %d)", newId, customerId, brandId, actualAmout, points, toBeUsedGCCount, amount, now, RECode, version);
             connection.createStatement().executeUpdate(sql4);
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -409,6 +412,7 @@ public class CustomerLogin {
             String sql4 = String.format("insert into REVIEWRECORD(customeractivityid, customerid, brandid, review, reviewdate, recode, versionnumber)" +
                     " VALUES (%d, '%s', '%s',  '%s', to_date('%s', 'mm/dd/yyyy'), '%s', %d)", newId, customerId, brandId, review, now, RECode, version);
             connection.createStatement().executeUpdate(sql4);
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -457,6 +461,7 @@ public class CustomerLogin {
 //            String sql4 = String.format("insert into REVIEWRECORD(customeractivityid, customerid, brandid, review, reviewdate, recode, versionnumber)" +
 //                    " VALUES (%d, '%s', '%s',  '%s', to_date('%s', 'mm/dd/yyyy'), '%s', %d)", newId, customerId, brandId, review, now, RECode, version);
 //            connection.createStatement().executeUpdate(sql4);
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -473,6 +478,7 @@ public class CustomerLogin {
             if (resultSet.next()) {
                 amount = resultSet.getInt(1);
             }
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -493,7 +499,9 @@ public class CustomerLogin {
         try {
             ResultSet resultSet = connection.createStatement().executeQuery(sql);
             resultSet.next();
-            return resultSet.getInt(1) + 1;
+            int res = resultSet.getInt(1) + 1;
+            resultSet.close();
+            return res;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -508,7 +516,7 @@ public class CustomerLogin {
             ResultSet resultSet = connection.createStatement().executeQuery(sql);
             resultSet.next();
             RECode = resultSet.getString(1);
-
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -523,6 +531,7 @@ public class CustomerLogin {
             ResultSet resultSet = connection.createStatement().executeQuery(sql);
             resultSet.next();
             version = resultSet.getInt(1);
+            resultSet.close();
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -539,6 +548,7 @@ public class CustomerLogin {
             ResultSet resultSet = connection.createStatement().executeQuery(sql);
             resultSet.next();
             ISTIERED = resultSet.getInt(1);
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -553,6 +563,7 @@ public class CustomerLogin {
             ResultSet resultSet = connection.createStatement().executeQuery(sql2);
             resultSet.next();
             levelNumber = resultSet.getInt(1);
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -563,6 +574,7 @@ public class CustomerLogin {
             ResultSet resultSet = connection.createStatement().executeQuery(sql3);
             resultSet.next();
             multiplier = resultSet.getDouble(1);
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -576,6 +588,7 @@ public class CustomerLogin {
             ResultSet resultSet = connection.createStatement().executeQuery(sql1);
             resultSet.next();
             levelNumber = resultSet.getInt(1);
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -587,6 +600,7 @@ public class CustomerLogin {
             ResultSet resultSet = connection.createStatement().executeQuery(sql2);
             resultSet.next();
             maxnumber = resultSet.getInt(1);
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -602,6 +616,7 @@ public class CustomerLogin {
             ResultSet resultSet = connection.createStatement().executeQuery(sql3);
             resultSet.next();
             pointsRequired = resultSet.getInt(1);
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -612,6 +627,7 @@ public class CustomerLogin {
             ResultSet resultSet = connection.createStatement().executeQuery(sql4);
             resultSet.next();
             totalPoints = resultSet.getDouble(1);
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -633,20 +649,20 @@ public class CustomerLogin {
         String sql1 = String.format("select * from WALLET where CUSTOMERID = '%s'", customerId);
         try {
             ResultSet resultSet = connection.createStatement().executeQuery(sql1);
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 String loyaltyProgramID = resultSet.getString(3);
                 String brandID = resultSet.getString(4);
                 String availablePoint = resultSet.getString(5);
                 String totalPoint = resultSet.getString(6);
                 String levelNum = resultSet.getString(7);
-                if (levelNum.equals("0")){
+                if (levelNum.equals("0")) {
                     String regularLog = String.format("For your enrolled regular loyalty program " +
                             "%s" + " under %s, " + " you currently have earned %s total points" +
                             " and %s points available for redemption!", loyaltyProgramID, brandID, totalPoint, availablePoint);
                     System.out.println(regularLog);
                 } else {
                     String sql2 = String.format("select LEVELNAME from TIEREDPROGRAM where LOYALTY_PROGRAM_ID = '%s' AND LEVELNUMBER = %s", loyaltyProgramID, levelNum);
-                    ResultSet  tierResult = connection.createStatement().executeQuery(sql2);
+                    ResultSet tierResult = connection.createStatement().executeQuery(sql2);
                     tierResult.next();
                     String tierStatus = tierResult.getString(1);
                     String tierLog = String.format("For your enrolled tired loyalty program " +
