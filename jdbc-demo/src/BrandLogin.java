@@ -739,7 +739,7 @@ public class BrandLogin {
                             }
                         }
                         else {
-                            System.out.println("There is no Program in current brand, please add one first.");
+                            System.out.println("There is no new Program created in current brand, nothing happens at this point.");
                             return;
                         }
                         break;
