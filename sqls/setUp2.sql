@@ -77,32 +77,32 @@ insert into LOYALTY_PROGRAM_HAS_REWARD(loyalty_program_id, rewardid, quantity)
 VALUES ('RLP01', 'R01', 25);
 
 --add RE rules
-insert into RERULES(recode, brandid, loyalty_program_id, activityid, points, versionnumber, status)
-VALUES ('B01RE01', 'Brand01', 'TLP01', 'A01', 15, 1, 1);
-insert into RERULES(recode, brandid, loyalty_program_id, activityid, points, versionnumber, status)
-VALUES ('B01RE02', 'Brand01', 'TLP01', 'A02', 10, 1, 1);
+insert into RERULES(recode,  loyalty_program_id, activityid, points, versionnumber, status)
+VALUES ('B01RE01', 'TLP01', 'A01', 15, 1, 1);
+insert into RERULES(recode, loyalty_program_id, activityid, points, versionnumber, status)
+VALUES ('B01RE02',  'TLP01', 'A02', 10, 1, 1);
 
-insert into RERULES(recode, brandid, loyalty_program_id, activityid, points, versionnumber, status)
-VALUES ('B02RE01', 'Brand02', 'TLP02', 'A01', 40, 1, 1);
-insert into RERULES(recode, brandid, loyalty_program_id, activityid, points, versionnumber, status)
-VALUES ('B02RE02', 'Brand02', 'TLP02', 'A03', 30, 1, 1);
+insert into RERULES(recode, loyalty_program_id, activityid, points, versionnumber, status)
+VALUES ('B02RE01', 'TLP02', 'A01', 40, 1, 1);
+insert into RERULES(recode, loyalty_program_id, activityid, points, versionnumber, status)
+VALUES ('B02RE02', 'TLP02', 'A03', 30, 1, 1);
 
-insert into RERULES(recode, brandid, loyalty_program_id, activityid, points, versionnumber, status)
-VALUES ('B03RE01', 'Brand03', 'RLP01', 'A03', 10, 1, 1);
+insert into RERULES(recode, loyalty_program_id, activityid, points, versionnumber, status)
+VALUES ('B03RE01', 'RLP01', 'A03', 10, 1, 1);
 
 --add RR rules
-insert into RRRULES (RRCODE, LOYALTY_PROGRAM_ID, BRANDID, REWARDID, POINTS, STATUS, VERSIONNUM)
-values ('B01RR01', 'TLP01', 'Brand01', 'R01', 80, 1, 1);
-insert into RRRULES (RRCODE, LOYALTY_PROGRAM_ID, BRANDID, REWARDID, POINTS, STATUS, VERSIONNUM)
-values ('B01RR02', 'TLP01', 'Brand01', 'R02', 70, 1, 1);
+insert into RRRULES (RRCODE, LOYALTY_PROGRAM_ID, REWARDID, POINTS, STATUS, VERSIONNUM)
+values ('B01RR01', 'TLP01', 'R01', 80, 1, 1);
+insert into RRRULES (RRCODE, LOYALTY_PROGRAM_ID, REWARDID, POINTS, STATUS, VERSIONNUM)
+values ('B01RR02', 'TLP01', 'R02', 70, 1, 1);
 
-insert into RRRULES (RRCODE, LOYALTY_PROGRAM_ID, BRANDID, REWARDID, POINTS, STATUS, VERSIONNUM)
-values ('B02RR01', 'TLP02', 'Brand02', 'R01', 120, 1, 1);
-insert into RRRULES (RRCODE, LOYALTY_PROGRAM_ID, BRANDID, REWARDID, POINTS, STATUS, VERSIONNUM)
-values ('B02RR02', 'TLP02', 'Brand02', 'R02', 90, 1, 1);
+insert into RRRULES (RRCODE, LOYALTY_PROGRAM_ID, REWARDID, POINTS, STATUS, VERSIONNUM)
+values ('B02RR01', 'TLP02', 'R01', 120, 1, 1);
+insert into RRRULES (RRCODE, LOYALTY_PROGRAM_ID, REWARDID, POINTS, STATUS, VERSIONNUM)
+values ('B02RR02', 'TLP02', 'R02', 90, 1, 1);
 
-insert into RRRULES (RRCODE, LOYALTY_PROGRAM_ID, BRANDID, REWARDID, POINTS, STATUS, VERSIONNUM)
-values ('B03RR01', 'RLP01', 'Brand03', 'R01', 100, 1, 1);
+insert into RRRULES (RRCODE, LOYALTY_PROGRAM_ID, REWARDID, POINTS, STATUS, VERSIONNUM)
+values ('B03RR01', 'RLP01', 'R01', 100, 1, 1);
 
 -- add customer
 insert into CUSTOMER(customerid, password, name, phone, address, walletid)
@@ -449,7 +449,7 @@ values ('C0005', 'Brand01', 'R01', 1);
 insert into REDEEMRECORD (CUSTOMERID, BRANDID, POINTREDEEMED, RRCODE, VERSIONNUM, REDEEMDATE, REWARDID, QUANTITY)
 values ('C0005', 'Brand01', 70, 'B02RR02', 1, to_date('10/17/2021', 'mm/dd/yyyy'), 'R02', 1);
 insert into WALLETREWARDS (CUSTOMERID, BRANDID, REWARDID, QUANTITY)
-values ('C0005', 'Brand01', 'R02', 1);
+values ('8', 'Brand01', 'R02', 1);
 update WALLET
 set POINTS = POINTS - 150
 where WALLETID = 'W0005'
