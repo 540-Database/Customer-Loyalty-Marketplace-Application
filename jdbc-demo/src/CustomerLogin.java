@@ -548,8 +548,10 @@ public class CustomerLogin {
                             "%s" + " under %s, " + "you are %s tired status!" + " You currently have earned %s total points" +
                             " and %s points available for redemption!", loyaltyProgramID, brandID, tierStatus, totalPoint, availablePoint);
                     System.out.println(tierLog);
+                    tierResult.close();
                 }
             }
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
