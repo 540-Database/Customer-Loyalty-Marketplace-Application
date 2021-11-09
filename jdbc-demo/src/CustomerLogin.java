@@ -34,6 +34,8 @@ public class CustomerLogin {
                 if (!resultSet.next()) {
                     System.out.println("Wrong customer id or password entered! Please try again.");
                 } else {
+                    resultSet.close();
+                    statement.close();
                     System.out.println("\nLogin success! Welcome~");
                     break;
                 }
@@ -110,6 +112,10 @@ public class CustomerLogin {
                     loyaltyProgramIds.add(loyaltyProgramId);
                 }
             }
+
+            loyaltyPrograms.close();
+            statement.close();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -148,6 +154,10 @@ public class CustomerLogin {
                 String now = Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
                 statement.executeQuery(String.format("INSERT INTO CUSTOMERACTIVITIES (CUSTOMERACTIVITYID, customerid, brandid, activityid, pointsearned, activitydate) " +
                         "VALUES (%d, '%s', '%s', 'A00', 0, to_date('%s', 'mm/dd/yyyy'))", customerActivityId, customerId, brandId, now));
+
+                resultBrandId.close();
+                loyaltyProgramsHasEnrolled.close();
+                statement.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }

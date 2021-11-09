@@ -20,30 +20,7 @@ public class DBConnection {
             ResultSet rs = null;
 
             try {
-
-                // Get a connection from the first driver in the
-                // DriverManager list that recognizes the URL jdbcURL
                 connection = DriverManager.getConnection(jdbcURL, user, password);
-
-                // Create a statement object that will be sending your
-                // SQL statements to the DBMS
-
-                stmt = connection.createStatement();
-
-                // Get data from the COFFEES table
-
-                // rs = stmt.executeQuery("SELECT COF_NAME, PRICE FROM COFFEES1");
-
-                // Now rs contains the rows of coffees and prices from
-                // the COFFEES table. To access the data, use the method
-                // NEXT to access all rows in rs, one row at a time
-
-//                while (rs.next()) {
-//                    String s = rs.getString("COF_NAME");
-//                    float n = rs.getFloat("PRICE");
-//                    System.out.println(s + "   " + n);
-//                }
-
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -62,12 +39,6 @@ public class DBConnection {
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
         // connect to the Oracle server
         setConnection("", "");
-        // todo: how to init Oracle database frame & data by Java?
-//        System.out.println("Need to recreate and reinitiate data tables? 1. NO. 2 Yes");
-//        // if yes, reinitiate the tables
-//        if(new Scanner(System.in).nextInt() == 2){
-//            InitiateProcess.init(connection);
-//        }
         Scanner scanner = new Scanner(System.in);
         int choice;
         System.out.println("\nWelcome to the Customer Loyalty Marketplace Application!");
@@ -77,6 +48,7 @@ public class DBConnection {
             choice = scanner.nextInt();
             switch (choice) {
                 case 0:
+                    close(connection);
                     System.out.println("Goodbye!");
                     break;
                 case 1:
