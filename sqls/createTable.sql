@@ -224,7 +224,10 @@ create table WalletRewards
     BrandID    VARCHAR(45) NOT NULL,
     RewardID   VARCHAR(45) NOT NULL,
     Quantity   INTEGER     NOT NULL,
-    primary key (CustomerID, BrandID, RewardID)
+    Primary Key (CustomerID, BrandID, RewardID),
+    FOREIGN KEY (CustomerID) REFERENCES Customer,
+    FOREIGN KEY (BrandID) REFERENCES Brand,
+    FOREIGN KEY (RewardID) REFERENCES Reward
 );
 
 -- 2NF

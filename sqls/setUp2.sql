@@ -449,7 +449,7 @@ values ('C0005', 'Brand01', 'R01', 1);
 insert into REDEEMRECORD (CUSTOMERID, BRANDID, POINTREDEEMED, RRCODE, VERSIONNUM, REDEEMDATE, REWARDID, QUANTITY)
 values ('C0005', 'Brand01', 70, 'B02RR02', 1, to_date('10/17/2021', 'mm/dd/yyyy'), 'R02', 1);
 insert into WALLETREWARDS (CUSTOMERID, BRANDID, REWARDID, QUANTITY)
-values ('8', 'Brand01', 'R02', 1);
+values ('C0005', 'Brand01', 'R02', 1);
 update WALLET
 set POINTS = POINTS - 150
 where WALLETID = 'W0005'
