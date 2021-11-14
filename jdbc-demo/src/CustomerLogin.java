@@ -410,9 +410,10 @@ public class CustomerLogin {
                 }
 
                 String pointsNeeded = rewardNameToPoints.get(redeemItemName);
-                int pointHaveInt = Integer.parseInt(pointHave);
+//                int pointHaveInt = Integer.parseInt(pointHave);
+                double pointHaveDouble = Double.parseDouble(pointHave);
                 int pointsNeededInt = Integer.parseInt(pointsNeeded);
-                if (pointHaveInt < pointsNeededInt){
+                if (pointHaveDouble < pointsNeededInt){
                     System.out.println("Sorry, you don't have enough points to redeem this reward.");
                     continue;
                 }
@@ -461,8 +462,8 @@ public class CustomerLogin {
                         "VALUES ('%s', '%s', '%s', '%s', '%s', to_date('%s', 'mm/dd/yyyy'), '%s', %d)",
                         customerId, brandId, pointsNeeded, rrcode, versionNum, now, rewardId, 1));
                 statement.executeUpdate(String.format(
-                        "UPDATE WALLET SET POINTS = %d WHERE CUSTOMERID = '%s' AND LOYALTY_PROGRAM_ID = '%s'",
-                        (pointHaveInt - pointsNeededInt), customerId, loyaltyProgramIdSelected));
+                        "UPDATE WALLET SET POINTS = %f WHERE CUSTOMERID = '%s' AND LOYALTY_PROGRAM_ID = '%s'",
+                        (pointHaveDouble - pointsNeededInt), customerId, loyaltyProgramIdSelected));
 
                 ResultSet walletRewardRecord = statement.executeQuery(String.format(
                         "SELECT * FROM WALLETREWARDS WHERE CUSTOMERID = '%s' AND BRANDID = '%s' AND REWARDID = '%s'",
@@ -475,10 +476,10 @@ public class CustomerLogin {
                 }
                 else {
                     walletRewardRecord.next();
-                    int quantityCustomerHave = walletRewardRecord.getInt(1);
+                    int quantityCustomerHave = walletRewardRecord.getInt(4);
                     statement.executeUpdate(String.format(
-                            "INSERT INTO WALLETREWARDS (CUSTOMERID, BRANDID, REWARDID, QUANTITY) " +
-                                    "VALUES ('%s', '%s', '%s', %d)", customerId, brandId, rewardId, quantityCustomerHave));
+                            "UPDATE WALLETREWARDS SET QUANTITY = %d WHERE CUSTOMERID = '%s' AND BRANDID = '%s' AND REWARDID = '%s'",
+                            quantityCustomerHave + 1, customerId, brandId, rewardId));
                 }
 
                 try{

@@ -253,44 +253,48 @@ public class BrandLogin {
             System.out.println("1. Set up\n2. Go Back");
 
             choice = scanner.nextInt();
-            switch (choice) {
-                case 1:
-                    Statement statement = connection.createStatement();
-                    System.out.println("Please enter the Number of tiers (max 3)");
-                    int numTiers = scanner.nextInt();
-                    while (numTiers != 1 && numTiers != 2 && numTiers != 3) {
-                        System.out.println("Number of tiers should be in range 1 to 3. Please enter a new one.");
-                        numTiers = scanner.nextInt();
-                    }
+            try {
+                switch (choice) {
+                    case 1:
+                        Statement statement = connection.createStatement();
+                        System.out.println("Please enter the Number of tiers (max 3)");
+                        int numTiers = scanner.nextInt();
+                        while (numTiers != 1 && numTiers != 2 && numTiers != 3) {
+                            System.out.println("Number of tiers should be in range 1 to 3. Please enter a new one.");
+                            numTiers = scanner.nextInt();
+                        }
 
-                    int preTierPoints = 0;
-                    for (int i = 1; i <= numTiers; ++i) {
-                        System.out.println("Please enter the name of Tier " + i);
-                        String tierName = scanner.next();
-                        System.out.println("Please enter the points required of Tier " + i);
-                        int tierPoints = scanner.nextInt();
-                        while (tierPoints <= preTierPoints) {
-                            System.out.println("The points required you entered should be strictly larger than the previous tier, please enter a new one");
-                            tierPoints = scanner.nextInt();
+                        int preTierPoints = 0;
+                        for (int i = 1; i <= numTiers; ++i) {
+                            System.out.println("Please enter the name of Tier " + i);
+                            String tierName = scanner.next();
+                            System.out.println("Please enter the points required of Tier " + i);
+                            int tierPoints = scanner.nextInt();
+                            while (tierPoints <= preTierPoints) {
+                                System.out.println("The points required you entered should be strictly larger than the previous tier, please enter a new one");
+                                tierPoints = scanner.nextInt();
+                            }
+                            System.out.println("Please enter the multiplier of Tier " + i);
+                            double tierMultiplier = scanner.nextDouble();
+                            while (tierMultiplier <= 0) {
+                                System.out.println("The multiplier should be strictly larger than 0, please enter a new one");
+                                tierMultiplier = scanner.nextDouble();
+                            }
+                            ResultSet resultSet = statement.executeQuery(String.format("INSERT INTO TIEREDPROGRAM VALUES ('%s', '%s', '%s', '%s', '%s')", ProgramID, i, tierPoints, tierName, tierMultiplier));
+                            System.out.println("Tier " + i + "set up successfully!");
+                            resultSet.close();
+                            preTierPoints = tierPoints;
                         }
-                        System.out.println("Please enter the multiplier of Tier " + i);
-                        double tierMultiplier = scanner.nextDouble();
-                        while (tierMultiplier <= 0) {
-                            System.out.println("The multiplier should be strictly larger than 0, please enter a new one");
-                            tierMultiplier = scanner.nextDouble();
-                        }
-                        ResultSet resultSet = statement.executeQuery(String.format("INSERT INTO TIEREDPROGRAM VALUES ('%s', '%s', '%s', '%s', '%s')", ProgramID, i, tierPoints, tierName, tierMultiplier));
-                        System.out.println("Tier " + i + "set up successfully!");
-                        resultSet.close();
-                        preTierPoints = tierPoints;
-                    }
-                    statement.close();
-                    return;
-                case 2:
-                    return;
-                default:
-                    System.out.println("Invaild option entered. Please try again.");
-                    break;
+                        statement.close();
+                        return;
+                    case 2:
+                        return;
+                    default:
+                        System.out.println("Invaild option entered. Please try again.");
+                        break;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         } while (choice != 2);
     }
@@ -693,6 +697,7 @@ public class BrandLogin {
                     case 1:
                         if (isNewProgram) {
                             ResultSet resultSet = connection.createStatement().executeQuery(String.format("select LOYALTY_PROGRAM_ID, ISTIERED from REGULARLOYALTYPROGRAM where BrandID = ('%s')", BrandID));
+                            resultSet.next();
                             ProgramID = resultSet.getString(1);
                             ResultSet activityTypes = null, rewardTypes = null, RERules = null, RRRules = null, TierSetup = null;
                             Boolean isTiered = resultSet.getInt(2) == 1;
@@ -770,6 +775,7 @@ public class BrandLogin {
                         case 1:
                             try {
                                 ResultSet resultSet = connection.createStatement().executeQuery(String.format("select LOYALTY_PROGRAM_ID from REGULARLOYALTYPROGRAM where BrandID = ('%s')", BrandID));
+                                resultSet.next();
                                 ProgramID = resultSet.getString(1);
                                 connection.createStatement().executeQuery(String.format("Delete from REGULARLOYALTYPROGRAM where LOYALTY_PROGRAM_ID = ('%s')", ProgramID));
                                 connection.createStatement().executeQuery(String.format("Delete from TIEREDPROGRAM where LOYALTY_PROGRAM_ID = ('%s')", ProgramID));
