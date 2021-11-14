@@ -181,11 +181,11 @@ public class CustomerLogin {
         List<String> LOYALTY_PROGRAM_IDs = new ArrayList<>();
         try {
             ResultSet resultSet = connection.createStatement().executeQuery(sql);
-            System.out.println("Loyalty_Program_ID\tLoyalty_Program_Name\tBrand_Name");
+            System.out.println(String.format("%15s %25s %15s ", "Loyalty_Program_ID", "Loyalty_Program_Name", "Brand_Name"));
             while (resultSet.next()) {
                 String loyaltyProgramName = getLoyaltyProgramName(connection, resultSet.getString(1));
                 String brandName = getBrandName(connection, resultSet.getString(1));
-                System.out.println(resultSet.getString(1) + "\t" + loyaltyProgramName + "\t" + brandName);
+                System.out.println(String.format("%15s %25s %15s ", resultSet.getString(1), loyaltyProgramName, brandName));
                 LOYALTY_PROGRAM_IDs.add(resultSet.getString(1));
             }
         } catch (SQLException e) {
@@ -218,10 +218,10 @@ public class CustomerLogin {
         List<String> activityIds = new ArrayList<>();
         try {
             ResultSet resultSet = connection.createStatement().executeQuery(sql2);
-            System.out.println("Activity_ID\tActivity_Name");
+            System.out.println(String.format("%10s %20s ", "Activity_ID", "Activity_ID"));
             while (resultSet.next()) {
                 activityIds.add(resultSet.getString(1));
-                System.out.println(resultSet.getString(1) + "\t" + resultSet.getString(2));
+                System.out.println(String.format("%10s %20s ", resultSet.getString(1), resultSet.getString(2)));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -284,6 +284,7 @@ public class CustomerLogin {
         }
         return brandName;
     }
+
     public static void redeemMenu(Connection connection) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
@@ -295,12 +296,12 @@ public class CustomerLogin {
             System.out.println("1. Rewards Selection\n2. Go back");
 
             choice = scanner.nextInt();
-            switch (choice){
+            switch (choice) {
                 case 1:
                     int result = redeemActivities(connection);
                     if (result == -1) return;
                     if (result == 1) return;
-                    if (result == 5){
+                    if (result == 5) {
                         System.out.println("----- Unknow error -----");
                     }
                     break;
@@ -318,12 +319,12 @@ public class CustomerLogin {
         scanner.useDelimiter("\n");
 
         // Checking all loyalty programs the customer enrolled in
-        try{
+        try {
             Statement statement = connection.createStatement();
             ResultSet loyaltyProgramHasEnrolled = statement.executeQuery(String.format("SELECT LOYALTY_PROGRAM_ID, " +
                     "BRANDID, POINTS FROM WALLET WHERE CUSTOMERID = '%s'", customerId));
 
-            if (!loyaltyProgramHasEnrolled.isBeforeFirst()){
+            if (!loyaltyProgramHasEnrolled.isBeforeFirst()) {
                 System.out.println("You haven't enrolled in any loyalty program yet!");
                 System.out.println("Redirecting to the customer login menu.");
                 return -1;
@@ -332,7 +333,7 @@ public class CustomerLogin {
             System.out.println("---------- Displaying all the loyalty programs you've enrolled in ----------");
             System.out.println(String.format("%12s %15s %12s", "Program id", "Brand id", "Your points"));
             Map<String, String> loyaltyProgramIdsEnrolledToPoints = new HashMap<>();
-            while (loyaltyProgramHasEnrolled.next()){
+            while (loyaltyProgramHasEnrolled.next()) {
                 String loyaltyProgramId = loyaltyProgramHasEnrolled.getString(1);
                 String loyaltyProgramBrandId = loyaltyProgramHasEnrolled.getString(2);
                 String loyaltyProgramPoints = loyaltyProgramHasEnrolled.getString(3);
@@ -340,10 +341,10 @@ public class CustomerLogin {
                 System.out.println(String.format("%12s %15s %12s", loyaltyProgramId, loyaltyProgramBrandId, loyaltyProgramPoints));
             }
 
-            try{
+            try {
                 loyaltyProgramHasEnrolled.close();
                 statement.close();
-            } catch (Throwable whatever){
+            } catch (Throwable whatever) {
                 System.out.println("Human Error.");
             }
 
@@ -351,8 +352,8 @@ public class CustomerLogin {
             String loyaltyProgramIdSelected = scanner.next();
             if (loyaltyProgramIdSelected.equals("0"))
                 return 0;
-            while (true){
-                if (!loyaltyProgramIdsEnrolledToPoints.containsKey(loyaltyProgramIdSelected)){
+            while (true) {
+                if (!loyaltyProgramIdsEnrolledToPoints.containsKey(loyaltyProgramIdSelected)) {
                     System.out.println("Wrong loyalty program id entered. Please try again:");
                     loyaltyProgramIdSelected = scanner.next();
                 } else {
@@ -365,7 +366,7 @@ public class CustomerLogin {
             ResultSet brandIdByProgramId = statement.executeQuery(String.format(
                     "SELECT BRANDID FROM REGULARLOYALTYPROGRAM WHERE LOYALTY_PROGRAM_ID = '%s'", loyaltyProgramIdSelected
             ));
-            if (brandIdByProgramId.next()){
+            if (brandIdByProgramId.next()) {
                 brandId = brandIdByProgramId.getString(1);
             }
 
@@ -373,19 +374,19 @@ public class CustomerLogin {
             ResultSet rewardSections = statement.executeQuery(String.format(
                     "SELECT rd.REWARDNAME, rrr.POINTS FROM RRRULES rrr, REWARD rd WHERE rrr.STATUS = 1 " +
                             "AND rrr.LOYALTY_PROGRAM_ID = '%s' AND rrr.REWARDID = rd.REWARDID", loyaltyProgramIdSelected));
-            if (!rewardSections.isBeforeFirst()){
+            if (!rewardSections.isBeforeFirst()) {
                 System.out.println("Sorry, this program do not have any reward options yet.");
                 System.out.println("Redirecting to the loyalty program selection page.");
             }
             Map<String, String> rewardNameToPoints = new HashMap<>();
-            while (rewardSections.next()){
+            while (rewardSections.next()) {
                 rewardNameToPoints.put(rewardSections.getString(1), rewardSections.getString(2));
             }
 
             try {
                 rewardSections.close();
                 statement.close();
-            } catch (Throwable whatever){
+            } catch (Throwable whatever) {
                 System.out.println("Human Error.");
             }
 
@@ -393,18 +394,18 @@ public class CustomerLogin {
             String pointHave = loyaltyProgramIdsEnrolledToPoints.get(loyaltyProgramIdSelected);
             System.out.println(String.format("You have %s points currently.", pointHave));
             System.out.println(String.format("%12s %15s", "Reward Name", "Points needed"));
-            for (Map.Entry<String, String> entry : rewardNameToPoints.entrySet()){
+            for (Map.Entry<String, String> entry : rewardNameToPoints.entrySet()) {
                 System.out.println(String.format("%12s %15s", entry.getKey(), entry.getValue()));
             }
 
-            while (true){
+            while (true) {
                 System.out.println("Please select the reward you want to redeem:");
                 System.out.println("If you wish to go back to redeem menu, enter 0.");
                 String redeemItemName = scanner.next().trim();
                 if (redeemItemName.equals("0"))
                     return 0;
 
-                if (!rewardNameToPoints.containsKey(redeemItemName)){
+                if (!rewardNameToPoints.containsKey(redeemItemName)) {
                     System.out.println("Wrong reward name entered! Please enter again.");
                     continue;
                 }
@@ -413,7 +414,7 @@ public class CustomerLogin {
 //                int pointHaveInt = Integer.parseInt(pointHave);
                 double pointHaveDouble = Double.parseDouble(pointHave);
                 int pointsNeededInt = Integer.parseInt(pointsNeeded);
-                if (pointHaveDouble < pointsNeededInt){
+                if (pointHaveDouble < pointsNeededInt) {
                     System.out.println("Sorry, you don't have enough points to redeem this reward.");
                     continue;
                 }
@@ -423,17 +424,17 @@ public class CustomerLogin {
                 String rewardId = "";
                 ResultSet rewardQuantity = statement.executeQuery(
                         String.format("SELECT lphr.QUANTITY, lphr.REWARDID FROM LOYALTY_PROGRAM_HAS_REWARD lphr, REWARD rd" +
-                                " WHERE lphr.LOYALTY_PROGRAM_ID = '%s' AND lphr.REWARDID = rd.REWARDID AND rd.REWARDNAME = '%s'",
+                                        " WHERE lphr.LOYALTY_PROGRAM_ID = '%s' AND lphr.REWARDID = rd.REWARDID AND rd.REWARDNAME = '%s'",
                                 loyaltyProgramIdSelected, redeemItemName));
-                if (rewardQuantity.next()){
+                if (rewardQuantity.next()) {
                     quantity = rewardQuantity.getInt(1);
                     rewardId = rewardQuantity.getString(2);
                 }
-                if (quantity == Integer.MIN_VALUE || rewardId.equals("")){
+                if (quantity == Integer.MIN_VALUE || rewardId.equals("")) {
                     System.out.println("Unknow error occurred. Redirecting to the previous menu.");
                     return 5;
                 }
-                if (quantity <= 0){
+                if (quantity <= 0) {
                     System.out.println("Sorry but we are running out of this reward. Please select again.");
                     continue;
                 }
@@ -445,11 +446,11 @@ public class CustomerLogin {
                         loyaltyProgramIdSelected, rewardId
                 ));
                 String rrcode = "", versionNum = "";
-                if (rrcodeAndVersionViaProgramIdAndRewardId.next()){
+                if (rrcodeAndVersionViaProgramIdAndRewardId.next()) {
                     rrcode = rrcodeAndVersionViaProgramIdAndRewardId.getString(1);
                     versionNum = rrcodeAndVersionViaProgramIdAndRewardId.getString(2);
                 }
-                if (rrcode.equals("") || versionNum.equals("")){
+                if (rrcode.equals("") || versionNum.equals("")) {
                     System.out.println("Unknow error occurred. Redirecting to the previous menu.");
                     return 5;
                 }
@@ -458,8 +459,8 @@ public class CustomerLogin {
                         "UPDATE LOYALTY_PROGRAM_HAS_REWARD SET QUANTITY = '%s' WHERE LOYALTY_PROGRAM_ID = '%s' " +
                                 "AND REWARDID = '%s'", String.valueOf(quantity - 1), loyaltyProgramIdSelected, rewardId));
                 statement.executeUpdate(String.format("INSERT INTO REDEEMRECORD " +
-                        "(CUSTOMERID, BRANDID, POINTREDEEMED, RRCODE, VERSIONNUM, REDEEMDATE, REWARDID, QUANTITY) " +
-                        "VALUES ('%s', '%s', '%s', '%s', '%s', to_date('%s', 'mm/dd/yyyy'), '%s', %d)",
+                                "(CUSTOMERID, BRANDID, POINTREDEEMED, RRCODE, VERSIONNUM, REDEEMDATE, REWARDID, QUANTITY) " +
+                                "VALUES ('%s', '%s', '%s', '%s', '%s', to_date('%s', 'mm/dd/yyyy'), '%s', %d)",
                         customerId, brandId, pointsNeeded, rrcode, versionNum, now, rewardId, 1));
                 statement.executeUpdate(String.format(
                         "UPDATE WALLET SET POINTS = %f WHERE CUSTOMERID = '%s' AND LOYALTY_PROGRAM_ID = '%s'",
@@ -469,12 +470,11 @@ public class CustomerLogin {
                         "SELECT * FROM WALLETREWARDS WHERE CUSTOMERID = '%s' AND BRANDID = '%s' AND REWARDID = '%s'",
                         customerId, brandId, rewardId
                 ));
-                if (!walletRewardRecord.isBeforeFirst()){
+                if (!walletRewardRecord.isBeforeFirst()) {
                     statement.executeUpdate(String.format(
                             "INSERT INTO WALLETREWARDS (CUSTOMERID, BRANDID, REWARDID, QUANTITY) " +
                                     "VALUES ('%s', '%s', '%s', %d)", customerId, brandId, rewardId, 1));
-                }
-                else {
+                } else {
                     walletRewardRecord.next();
                     int quantityCustomerHave = walletRewardRecord.getInt(4);
                     statement.executeUpdate(String.format(
@@ -482,12 +482,12 @@ public class CustomerLogin {
                             quantityCustomerHave + 1, customerId, brandId, rewardId));
                 }
 
-                try{
+                try {
                     walletRewardRecord.close();
                     rrcodeAndVersionViaProgramIdAndRewardId.close();
                     rewardQuantity.close();
                     statement.close();
-                } catch (Throwable whatever){
+                } catch (Throwable whatever) {
                     System.out.println("Human Error.");
                 }
 //                System.out.println("你到达了Limbo。");
@@ -495,7 +495,7 @@ public class CustomerLogin {
                 return 1;
             }
 
-        } catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
