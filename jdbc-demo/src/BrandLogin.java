@@ -125,9 +125,19 @@ public class BrandLogin {
         } while (choice != 3);
     }
 
-    public static void addRegularProgram(Connection connection) {
+    public static void addRegularProgram(Connection connection) throws SQLException{
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
+
+        ////        Detect whether this brand have a Loyalty Program or not.
+        Statement statement1 = connection.createStatement();
+        ResultSet resultSet1 = statement1.executeQuery(String.format("select * from REGULARLOYALTYPROGRAM where BrandID = ('%s')", BrandID));
+        if (resultSet1.next()) {
+            System.out.println("This Brand is already having a Loyalty Program, you can update it.");
+            resultSet1.close();
+            statement1.close();
+            return;
+        }
 
         int choice = 0;
 
@@ -180,6 +190,16 @@ public class BrandLogin {
     public static void addTierProgram(Connection connection) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
+
+        ////        Detect whether this brand have a Loyalty Program or not.
+        Statement statement1 = connection.createStatement();
+        ResultSet resultSet1 = statement1.executeQuery(String.format("select * from REGULARLOYALTYPROGRAM where BrandID = ('%s')", BrandID));
+        if (resultSet1.next()) {
+            System.out.println("This Brand is already having a Loyalty Program, you can update it.");
+            resultSet1.close();
+            statement1.close();
+            return;
+        }
 
         while (true) {
             System.out.println("Please enter your Loyalty Program ID & Name, split with comma:");
@@ -268,11 +288,17 @@ public class BrandLogin {
                         for (int i = 1; i <= numTiers; ++i) {
                             System.out.println("Please enter the name of Tier " + i);
                             String tierName = scanner.next();
-                            System.out.println("Please enter the points required of Tier " + i);
-                            int tierPoints = scanner.nextInt();
-                            while (tierPoints <= preTierPoints) {
-                                System.out.println("The points required you entered should be strictly larger than the previous tier, please enter a new one");
+                            int tierPoints;
+                            if (i > 1) {
+                                System.out.println("Please enter the points required of Tier " + i);
                                 tierPoints = scanner.nextInt();
+                                while (tierPoints <= preTierPoints) {
+                                    System.out.println("The points required you entered should be strictly larger than the previous tier, please enter a new one");
+                                    tierPoints = scanner.nextInt();
+                                }
+                            } else {
+                                System.out.println("The points required for Tier 1 will automatically set to 0");
+                                tierPoints = 0;
                             }
                             System.out.println("Please enter the multiplier of Tier " + i);
                             double tierMultiplier = scanner.nextDouble();
@@ -558,10 +584,14 @@ public class BrandLogin {
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
 
-        ResultSet programIDset = connection.createStatement().executeQuery(String.format("select LOYALTY_PROGRAM_ID from REGULARLOYALTYPROGRAM where BrandID = ('%s')", BrandID));
-        programIDset.next();
-        ProgramID = programIDset.getString(1);
-        programIDset.close();
+        try {
+            ResultSet programIDset = connection.createStatement().executeQuery(String.format("select LOYALTY_PROGRAM_ID from REGULARLOYALTYPROGRAM where BrandID = ('%s')", BrandID));
+            programIDset.next();
+            ProgramID = programIDset.getString(1);
+            programIDset.close();
+        } catch (SQLException e) {
+            System.out.println("This Brand has no Loyalty Program, please create one first.");
+        }
 
         ResultSet resultSet = connection.createStatement().executeQuery(String.format("select RRCODE from RRRULES where LOYALTY_PROGRAM_ID = ('%s') and Status = 1", ProgramID));
 
@@ -621,12 +651,16 @@ public class BrandLogin {
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
 
-        Statement statement = connection.createStatement();
-        ResultSet programIDset = statement.executeQuery(String.format("select LOYALTY_PROGRAM_ID from REGULARLOYALTYPROGRAM where BrandID = ('%s')", BrandID));
-        programIDset.next();
-        ProgramID = programIDset.getString(1);
-        programIDset.close();
-        ResultSet resultSet = statement.executeQuery(String.format("select RECODE from RERULES where LOYALTY_PROGRAM_ID = '%s' and Status = 1", ProgramID));
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet programIDset = statement.executeQuery(String.format("select LOYALTY_PROGRAM_ID from REGULARLOYALTYPROGRAM where BrandID = ('%s')", BrandID));
+            programIDset.next();
+            ProgramID = programIDset.getString(1);
+            programIDset.close();
+        }catch (SQLException e) {
+            System.out.println("This Brand has no Loyalty Program, please create one first.");
+        }
+        ResultSet resultSet = connection.createStatement().executeQuery(String.format("select RECODE from RERULES where LOYALTY_PROGRAM_ID = '%s' and Status = 1", ProgramID));
 
         Set<String> ReRules = new HashSet<>();
         String Rules = "";
@@ -685,7 +719,6 @@ public class BrandLogin {
     public static void validateProgram(Connection connection)  throws SQLException{
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\n");
-
         int choice = 0;
         do {
             System.out.println("---------- Brand: validateLoyaltyProgram Page ----------");
@@ -695,6 +728,7 @@ public class BrandLogin {
                 choice = scanner.nextInt();
                 switch (choice) {
                     case 1:
+                        boolean isValid = true;
                         if (isNewProgram) {
                             ResultSet resultSet = connection.createStatement().executeQuery(String.format("select LOYALTY_PROGRAM_ID, ISTIERED from REGULARLOYALTYPROGRAM where BrandID = ('%s')", BrandID));
                             resultSet.next();
@@ -704,42 +738,65 @@ public class BrandLogin {
                             resultSet.close();
                             try {
                                 activityTypes = connection.createStatement().executeQuery(String.format("select ACTIVITYID from LOYALTY_PROGRAM_HAS_ACTIVITY where LOYALTY_PROGRAM_ID = ('%s')", ProgramID));
-                                rewardTypes = connection.createStatement().executeQuery(String.format("select REWARDID from LOYALTY_PROGRAM_HAS_REWARD where LOYALTY_PROGRAM_ID = ('%s')", ProgramID));
-                                RERules = connection.createStatement().executeQuery(String.format("select RECODE from RERULES where LOYALTY_PROGRAM_ID = '%s' and Status = 1", ProgramID));
-                                RRRules = connection.createStatement().executeQuery(String.format("select RRCODE from RRRULES where LOYALTY_PROGRAM_ID = '%s' and Status = 1", ProgramID));
-                                TierSetup = connection.createStatement().executeQuery(String.format("select * from TIEREDPROGRAM where LOYALTY_PROGRAM_ID = '%s'", ProgramID));
+                                activityTypes.next();
+                                activityTypes.getString(1);
                             } catch (SQLException e) {
-//                                System.out.println("Some errors occur");
-                                e.printStackTrace();
+                                isValid = false;
+                                System.out.println("There is no available activity types in current program, please add at least one.");
                             }
 
-                            if (!activityTypes.next())
-                                System.out.println("There is no available activity types in current program, please add at least one.");
-                            else if (!rewardTypes.next())
+                            try {
+                                rewardTypes = connection.createStatement().executeQuery(String.format("select REWARDID from LOYALTY_PROGRAM_HAS_REWARD where LOYALTY_PROGRAM_ID = ('%s')", ProgramID));
+                                rewardTypes.next();
+                                rewardTypes.getString(1);
+                            } catch (SQLException e) {
+                                isValid = false;
                                 System.out.println("There is no available reward types in current program, please add at least one.");
-                            else if (!RERules.next())
+                            }
+
+                            try {
+                                RERules = connection.createStatement().executeQuery(String.format("select RECODE from RERULES where LOYALTY_PROGRAM_ID = '%s' and Status = 1", ProgramID));
+                                RERules.next();
+                                RERules.getString(1);
+                            } catch (SQLException e) {
+                                isValid = false;
                                 System.out.println("There is no available RE Rules in current program, please add at least one.");
-                            else if (!RRRules.next())
+                            }
+
+                            try {
+                                RRRules = connection.createStatement().executeQuery(String.format("select RRCODE from RRRULES where LOYALTY_PROGRAM_ID = '%s' and Status = 1", ProgramID));
+                                RRRules.next();
+                                RRRules.getString(1);
+                            } catch (SQLException e) {
+                                isValid = false;
                                 System.out.println("There is no available RR Rules in current program, please add at least one.");
-                            else if (isTiered && !TierSetup.next())
-                                System.out.println("Current program is a Tiered Program and you haven't done the Tier set up, please set it before validate.");
-                            else {
+                            }
+
+                            if (isTiered) {
+                                try {
+                                    TierSetup = connection.createStatement().executeQuery(String.format("select * from TIEREDPROGRAM where LOYALTY_PROGRAM_ID = '%s'", ProgramID));
+                                    TierSetup.next();
+                                    TierSetup.getString(1);
+                                } catch (SQLException e) {
+                                    isValid = false;
+                                    System.out.println("Current program is a Tiered Program and you haven't done the Tier set up, please set it before validate.");
+                                }
+                                TierSetup.close();
+                            }
+
+                            activityTypes.close();
+                            rewardTypes.close();
+                            RERules.close();
+                            RRRules.close();
+
+
+                            if (isValid) {
                                 System.out.println("Validate current Program successfully!");
                                 isNewProgram = false;
-                                activityTypes.close();
-                                rewardTypes.close();
-                                RERules.close();
-                                RRRules.close();
-                                TierSetup.close();
                                 return;
                             }
 
                             if (isNewProgram) {
-                                activityTypes.close();
-                                rewardTypes.close();
-                                RERules.close();
-                                RRRules.close();
-                                TierSetup.close();
                                 return;
                             }
                         }
